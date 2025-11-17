@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Добро пожаловать на квиз</title>
+<style>
+    :root {
+        --bg: #0e0f1a;
+        --card-bg: #1a1b2e;
+        --text: #ffffff;
+        --accent: #4da3ff;
+        --accent-hover: #78bbff;
+        --radius: 12px;
+        --font: "Arial", sans-serif;
+    }
+
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        margin: 0; padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .card {
+        background: var(--card-bg);
+        padding: 40px 60px;
+        border-radius: var(--radius);
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h1 { margin-bottom: 30px; }
+
+    .btn {
+        display: inline-block;
+        padding: 12px 28px;
+        background: var(--accent);
+        color: #000;
+        border-radius: var(--radius);
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+</style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Добро пожаловать на квиз!</h1>
+        <a href="1.html" class="btn">Далее</a>
+    </div>
+</body>
+</html>

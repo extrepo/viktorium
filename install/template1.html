@@ -1,0 +1,235 @@
+<script>
+const sample = {
+  id: "Q-001",
+  title: "Вступительный квиз",
+  topic: "Физика",
+  points: 2,
+  time_seconds: 15,
+  text: "Какой элемент является самым лёгким по атомной массе?",
+  options: [
+    {id: "1", text: "Кислород"},
+    {id: "2", text: "Гелий"},
+    {id: "3", text: "Водород"},
+    {id: "4", text: "Углерод"}
+  ],
+  correct_id: "3",
+  next_href: "quiz_item_002.html"
+};
+</script>
+
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Квиз — Вопрос</title>
+
+<style>
+  /* --- Настройки для быстрой кастомизации --- */
+  :root{
+    --bg: #0b1220;             /* фон страницы */
+    --card-bg: #ffffff;        /* фон карточки */
+    --primary: #1f7a8c;        /* основной цвет (кнопки, таймер) */
+    --text: #0b1220;           /* основной текст */
+    --muted: #666666;          /* вспомогательный текст */
+    --correct: #2e7d32;        /* подсветка правильного */
+    --wrong: #c62828;          /* подсветка неправильного */
+    --radius: 12px;            /* скругление */
+    --font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --timer-size: 3rem;        /* размер таймера */
+  }
+
+  /* базовые стили */
+  html,body{height:100%;margin:0;background:var(--bg);font-family:var(--font-family);color:var(--text);}
+  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px;}
+  .card{width:100%;max-width:900px;background:var(--card-bg);border-radius:var(--radius);box-shadow:0 8px 30px rgba(2,6,23,0.45);padding:28px;box-sizing:border-box;}
+  h1{margin:0 0 12px 0;font-size:1.25rem;}
+  .meta{color:var(--muted);font-size:0.9rem;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+
+  /* вопрос и ответы */
+  .question{font-size:1.05rem;margin-bottom:16px;}
+  .answers{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px;}
+  .ans-btn{
+    padding:12px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);cursor:pointer;text-align:left;background:transparent;font-size:1rem;
+    transition:transform .08s ease, box-shadow .12s ease;
+  }
+  .ans-btn:hover{transform:translateY(-2px)}
+  .ans-btn.selected{box-shadow:0 6px 18px rgba(31,122,140,0.12);}
+
+  /* таймер */
+  .controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .timer{
+    font-size:var(--timer-size);
+    font-weight:700;
+    color:var(--primary);
+    min-width:110px;text-align:center;
+  }
+
+  /* кнопки */
+  .btn{
+    background:var(--primary);color:white;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600;
+  }
+  .btn.ghost{background:transparent;color:var(--primary);border:2px solid var(--primary);}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  /* подсветки после показа ответа */
+  .correct{background:rgba(46,125,50,0.12);border:2px solid var(--correct);color:var(--correct);font-weight:700;}
+  .wrong{background:rgba(198,40,40,0.08);border:2px solid var(--wrong);color:var(--wrong);}
+
+  /* мобильная адаптивность */
+  @media (max-width:560px){
+    :root{--timer-size:2.2rem}
+    .card{padding:18px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="quizCard" role="main" aria-live="polite">
+      <div class="meta">
+        <div>
+          <strong id="quizTitle">Название квиза — Вступительный</strong>
+          <div style="font-size:0.9rem;color:var(--muted)">Тема: <span id="quizTopic">Энергетика</span></div>
+        </div>
+        <div class="controls">
+          <div class="timer" id="timer" aria-atomic="true" aria-live="polite">00:15</div>
+          <div style="font-size:0.9rem;color:var(--muted)">Баллы: <span id="qPoints">2</span></div>
+        </div>
+      </div>
+
+      <h1 id="questionText">Какой элемент является самым лёгким по атомной массе?</h1>
+
+      <div class="answers" id="answersList" role="list">
+        <!-- Вставляем варианты через JS -->
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn ghost" id="revealBtn" disabled>Показать правильный ответ</button>
+        <button class="btn" id="nextBtn" disabled>Следующий вопрос</button>
+        <div style="margin-left:auto;color:var(--muted);font-size:0.9rem">ID: <span id="qid">Q-001</span></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function $(sel){return document.querySelector(sel);}
+function createOptionButton(opt){
+  const btn = document.createElement('button');
+  btn.className = 'ans-btn';
+  btn.type = 'button';
+  btn.setAttribute('data-id', opt.id);
+  btn.innerHTML = `<strong style="margin-right:8px">${opt.id}.</strong><span>${opt.text}</span>`;
+  return btn;
+}
+
+/* --- Инициализация UI --- */
+const answersList = $('#answersList');
+const qTitle = $('#quizTitle');
+const qTopic = $('#quizTopic');
+const qPoints = $('#qPoints');
+const qText = $('#questionText');
+const qId = $('#qid');
+const timerEl = $('#timer');
+const revealBtn = $('#revealBtn');
+const nextBtn = $('#nextBtn');
+
+let state = {
+  remaining: sample.time_seconds,
+  timerInterval: null,
+  revealed: false,
+  selected: null
+};
+
+function renderQuestion(data){
+  qTitle.textContent = data.title || 'Квиз';
+  qTopic.textContent = data.topic || '';
+  qPoints.textContent = data.points || 1;
+  qText.textContent = data.text || '';
+  qId.textContent = data.id || '';
+  answersList.innerHTML = '';
+  data.options.forEach(opt => {
+    const b = createOptionButton(opt);
+    b.addEventListener('click', ()=> {
+      if(state.revealed) return; // блокируем выбор после показа
+      // отметим выбор локально (не отправляя никуда)
+      document.querySelectorAll('.ans-btn').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');
+      state.selected = opt.id;
+    });
+    answersList.appendChild(b);
+  });
+  // подготовим кнопки и таймер
+  state.remaining = data.time_seconds;
+  updateTimerText();
+  revealBtn.disabled = true;
+  nextBtn.disabled = true;
+  state.revealed = false;
+  state.selected = null;
+  startTimer();
+  // указываем куда вести после показа
+  nextBtn.dataset.href = data.next_href || '#';
+}
+
+/* --- Таймер --- */
+function formatTime(sec){
+  const m = Math.floor(sec/60);
+  const s = sec%60;
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function updateTimerText(){
+  timerEl.textContent = formatTime(state.remaining);
+}
+
+function startTimer(){
+  stopTimer();
+  state.timerInterval = setInterval(()=>{
+    if(state.remaining > 0){
+      state.remaining--;
+      updateTimerText();
+      if(state.remaining === 0){
+        stopTimer();
+        // разрешаем показать правильный ответ
+        revealBtn.disabled = false;
+        revealBtn.focus();
+      }
+    }
+  }, 1000);
+}
+function stopTimer(){
+  if(state.timerInterval){ clearInterval(state.timerInterval); state.timerInterval = null; }
+}
+
+/* --- Показ ответа --- */
+revealBtn.addEventListener('click', ()=>{
+  if(state.revealed) return;
+  state.revealed = true;
+  // Подсветим варианты
+  const correctId = sample.correct_id;
+  document.querySelectorAll('.ans-btn').forEach(b=>{
+    const id = b.getAttribute('data-id');
+    b.disabled = true; // блокируем клики после показа
+    if(id === correctId){
+      b.classList.add('correct');
+      b.setAttribute('aria-label','Правильный вариант');
+    } else {
+      b.classList.add('wrong');
+    }
+  });
+  // включаем кнопку "Следующий"
+  nextBtn.disabled = false;
+});
+
+/* --- Переход дальше --- */
+nextBtn.addEventListener('click', ()=>{
+  // при экспорте замените href на фактическую ссылку следующей страницы
+  const href = nextBtn.dataset.href || sample.next_href || '#';
+  // если хотите — можно окно открывать в том же окне:
+  window.location.href = href;
+});
+
+/* --- Запуск (подставьте ваши данные при генерации страницы) --- */
+renderQuestion(sample);
+</script>
+</body>
+</html>
+

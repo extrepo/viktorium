@@ -65,6 +65,12 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_NAME="${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
+# Шаблоны
+
+install(FILES "install/welcome.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
+install(FILES "install/template1.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
+install(FILES "install/finish.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
+
 target_link_libraries(${PROJECT_NAME} PUBLIC
     utils
     unilog
