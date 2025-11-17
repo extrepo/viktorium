@@ -46,6 +46,7 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Gui CONFIG REQUIRED)
+find_package(Qt5Sql CONFIG REQUIRED)
 
 # Подгружаем необходимые библиотеки
 add_subdirectory(lib/unilog)
@@ -71,6 +72,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     Qt5::Widgets
     Qt5::Core
     Qt5::Gui
+    Qt5::Sql
 )
 # Подготовка окружения для инсталлятора
 if(WIN32 AND APP_DEPLOYQT)
