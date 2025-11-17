@@ -1,0 +1,12 @@
+bin/
+build/
+/obj-*/
+node_modules/
+.vscode/
+/.cache/
+.kde4/
+.kdev4/
+*.kdev4
+/CMakeLists.txt.user
+/static-analyzer/analysis-cppcheck-build-dir/*
+*.autosave

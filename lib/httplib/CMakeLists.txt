@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.7)
+
+project(httplib LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+file(GLOB_RECURSE HEADERS "*.h")
+
+add_library(${PROJECT_NAME} INTERFACE)
+
+add_custom_target(${PROJECT_NAME}_headers SOURCES "$<BUILD_INTERFACE:${HEADERS}>")
+
+target_include_directories(${PROJECT_NAME} INTERFACE
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)

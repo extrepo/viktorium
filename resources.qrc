@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/viktorium.ico</file>
+        <file>icons/microphone.ico</file>
+        <file>icons/pause.ico</file>
+        <file>icons/play.ico</file>
+        <file>icons/record.ico</file>
+        <file>icons/restart.ico</file>
+        <file>icons/stop.ico</file>
+        <file>icons/volume.ico</file>
+    </qresource>
+</RCC>

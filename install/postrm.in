@@ -1,0 +1,7 @@
+#!/bin/sh
+
+[ "$1" = "remove" ] || exit 0
+
+sudo -u $SUDO_USER xdg-desktop-icon uninstall @CMAKE_INSTALL_PREFIX@/share/applications/@PROJECT_NAME@.desktop
+
+ldconfig
