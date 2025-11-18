@@ -73,6 +73,7 @@ public:
     bool addResult(qint64 questionId, qint64 participantId, qint64 eventId, bool result, qint64 &outId);
     QVariantMap getResult(qint64 resultId);
     QVector<QVariantMap> listResultsByParticipant(qint64 participantId);
+    QVector<QVariantMap> listResultsByQuestion(qint64 questionId);
     bool updateResult(qint64 resultId, bool result);
     bool removeResult(qint64 resultId);
 

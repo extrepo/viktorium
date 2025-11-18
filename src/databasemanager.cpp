@@ -530,6 +530,17 @@ QVector<QVariantMap> DatabaseManager::listResultsByParticipant(qint64 participan
     return v;
 }
 
+QVector<QVariantMap> DatabaseManager::listResultsByQuestion(qint64 questionId)
+{
+    QVector<QVariantMap> v;
+    if (!m_db.isOpen() && !open()) return v;
+    QSqlQuery q(m_db);
+    q.prepare("SELECT * FROM result WHERE question_id = ?;");
+    if (!execPrepared(q, {questionId})) return v;
+    while (q.next()) v.append(recordToMap(q.record()));
+    return v;
+}
+
 bool DatabaseManager::updateResult(qint64 resultId, bool result)
 {
     QSqlQuery q(m_db);

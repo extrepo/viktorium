@@ -71,13 +71,20 @@ target_link_libraries(${PROJECT_NAME} PUBLIC utils unilog Qt5::Widgets Qt5::Core
 
 # Шаблоны
 install(FILES "install/welcome.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
+file(COPY "install/welcome.html" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vikatemplates/")
 install(FILES "install/template1.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
+file(COPY "install/template1.html" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vikatemplates/")
 install(FILES "install/finish.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
+file(COPY "install/finish.html" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vikatemplates/")
 
 # Тесты
 add_executable(lmtest ${INCLUDES} ${SOURCES} "tests/lmtest.cpp" resources.qrc resources.rc)
 target_include_directories(lmtest PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 target_link_libraries(lmtest PUBLIC utils unilog Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Sql Qt5::Network)
+
+add_executable(dbtest ${INCLUDES} ${SOURCES} "tests/dbtest.cpp" resources.qrc resources.rc)
+target_include_directories(dbtest PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_link_libraries(dbtest PUBLIC utils unilog Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Sql Qt5::Network)
 
 # Подготовка окружения для инсталлятора
 if(WIN32 AND APP_DEPLOYQT)
