@@ -87,9 +87,18 @@ bool DatabaseManager::createTables()
             quiz_id INTEGER PRIMARY KEY AUTOINCREMENT,
             type INTEGER, -- boolean stored as 0/1
             topic TEXT,
-            title TEXT,
-            time TEXT,  -- store ISO datetime string
             timer INTEGER
+        );
+    )sql");
+
+    // event
+    ok &= q.exec(R"sql(
+        CREATE TABLE IF NOT EXISTS event (
+            event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            quiz_id INTEGER,
+            title TEXT,
+            time TEXT,
+            FOREIGN KEY (quiz_id) REFERENCES quiz(quiz_id) ON DELETE CASCADE
         );
     )sql");
 
@@ -119,11 +128,11 @@ bool DatabaseManager::createTables()
     ok &= q.exec(R"sql(
         CREATE TABLE IF NOT EXISTS participant (
             participant_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            quiz_id INTEGER,
+            event_id INTEGER,
             user_id INTEGER,
             team_id INTEGER,
             number INTEGER,
-            FOREIGN KEY (quiz_id) REFERENCES quiz(quiz_id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES event(event_id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE SET NULL,
             FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL
         );
@@ -132,12 +141,14 @@ bool DatabaseManager::createTables()
     // result
     ok &= q.exec(R"sql(
         CREATE TABLE IF NOT EXISTS result (
+            result_id INTEGER PRIMARY KEY AUTOINCREMENT,
             question_id INTEGER,
             participant_id INTEGER,
+            event_id INTEGER,
             result INTEGER, -- boolean 0/1
-            PRIMARY KEY (question_id, participant_id),
             FOREIGN KEY (question_id) REFERENCES question(question_id) ON DELETE CASCADE,
-            FOREIGN KEY (participant_id) REFERENCES participant(participant_id) ON DELETE CASCADE
+            FOREIGN KEY (participant_id) REFERENCES participant(participant_id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES event(event_id) ON DELETE CASCADE
         );
     )sql");
 
@@ -293,12 +304,12 @@ bool DatabaseManager::removeTeamUser(qint64 userId, qint64 teamId)
 }
 
 // ---------- quiz ----------
-bool DatabaseManager::addQuiz(bool type, const QString &topic, const QString &title, const QDateTime &time, qint64 timer, qint64 &outId)
+bool DatabaseManager::addQuiz(bool type, const QString &topic, qint64 timer, qint64 &outId)
 {
     if (!m_db.isOpen() && !open()) return false;
     QSqlQuery q(m_db);
-    q.prepare("INSERT INTO quiz (type, topic, title, time, timer) VALUES (?, ?, ?, ?, ?);");
-    if (!execPrepared(q, { type ? 1 : 0, topic, title, time.toString(Qt::ISODate), timer })) return false;
+    q.prepare("INSERT INTO quiz (type, topic, timer) VALUES (?, ?, ?, ?, ?);");
+    if (!execPrepared(q, { type ? 1 : 0, topic, timer })) return false;
     outId = q.lastInsertId().toLongLong();
     return true;
 }
@@ -323,12 +334,12 @@ QVector<QVariantMap> DatabaseManager::listQuizzes()
     return v;
 }
 
-bool DatabaseManager::updateQuiz(qint64 quizId, bool type, const QString &topic, const QString &title, const QDateTime &time, qint64 timer)
+bool DatabaseManager::updateQuiz(qint64 quizId, bool type, const QString &topic, qint64 timer)
 {
     if (!m_db.isOpen() && !open()) return false;
     QSqlQuery q(m_db);
-    q.prepare("UPDATE quiz SET type = ?, topic = ?, title = ?, time = ?, timer = ? WHERE quiz_id = ?;");
-    return execPrepared(q, { type ? 1 : 0, topic, title, time.toString(Qt::ISODate), timer, quizId });
+    q.prepare("UPDATE quiz SET type = ?, topic = ?, timer = ? WHERE quiz_id = ?;");
+    return execPrepared(q, { type ? 1 : 0, topic, timer, quizId });
 }
 
 bool DatabaseManager::removeQuiz(qint64 quizId)
@@ -438,12 +449,12 @@ bool DatabaseManager::removeAnswer(qint64 answerId)
 }
 
 // ---------- participant ----------
-bool DatabaseManager::addParticipant(qint64 quizId, qint64 userId, qint64 teamId, int number, qint64 &outId)
+bool DatabaseManager::addParticipant(qint64 eventId, qint64 userId, qint64 teamId, int number, qint64 &outId)
 {
     if (!m_db.isOpen() && !open()) return false;
     QSqlQuery q(m_db);
-    q.prepare("INSERT INTO participant (quiz_id, user_id, team_id, number) VALUES (?, ?, ?, ?);");
-    if (!execPrepared(q, {quizId, userId == 0 ? QVariant(QVariant::LongLong) : QVariant(userId), teamId == 0 ? QVariant(QVariant::LongLong) : QVariant(teamId), number})) return false;
+    q.prepare("INSERT INTO participant (event_id, user_id, team_id, number) VALUES (?, ?, ?, ?);");
+    if (!execPrepared(q, {eventId, userId == 0 ? QVariant(QVariant::LongLong) : QVariant(userId), teamId == 0 ? QVariant(QVariant::LongLong) : QVariant(teamId), number})) return false;
     outId = q.lastInsertId().toLongLong();
     return true;
 }
@@ -459,13 +470,13 @@ QVariantMap DatabaseManager::getParticipant(qint64 participantId)
     return empty;
 }
 
-QVector<QVariantMap> DatabaseManager::listParticipantsByQuiz(qint64 quizId)
+QVector<QVariantMap> DatabaseManager::listParticipantsByEvent(qint64 eventId)
 {
     QVector<QVariantMap> v;
     if (!m_db.isOpen() && !open()) return v;
     QSqlQuery q(m_db);
-    q.prepare("SELECT * FROM participant WHERE quiz_id = ?;");
-    if (!execPrepared(q, {quizId})) return v;
+    q.prepare("SELECT * FROM participant WHERE event_id = ?;");
+    if (!execPrepared(q, {eventId})) return v;
     while (q.next()) v.append(recordToMap(q.record()));
     return v;
 }
@@ -487,21 +498,23 @@ bool DatabaseManager::removeParticipant(qint64 participantId)
 }
 
 // ---------- result ----------
-bool DatabaseManager::addResult(qint64 questionId, qint64 participantId, bool result)
+bool DatabaseManager::addResult(qint64 questionId, qint64 participantId, qint64 eventId, bool result, qint64 &outId)
 {
     if (!m_db.isOpen() && !open()) return false;
     QSqlQuery q(m_db);
-    q.prepare("INSERT OR REPLACE INTO result (question_id, participant_id, result) VALUES (?, ?, ?);");
-    return execPrepared(q, {questionId, participantId, result ? 1 : 0});
+    q.prepare("INSERT OR REPLACE INTO result (question_id, participant_id, event_id, result) VALUES (?, ?, ?);");
+    if (!execPrepared(q, {questionId, participantId, eventId, result ? 1 : 0})) return false;
+    outId = q.lastInsertId().toLongLong();
+    return true;
 }
 
-QVariantMap DatabaseManager::getResult(qint64 questionId, qint64 participantId)
+QVariantMap DatabaseManager::getResult(qint64 resultId)
 {
     QVariantMap empty;
     if (!m_db.isOpen() && !open()) return empty;
     QSqlQuery q(m_db);
-    q.prepare("SELECT * FROM result WHERE question_id = ? AND participant_id = ?;");
-    if (!execPrepared(q, {questionId, participantId})) return empty;
+    q.prepare("SELECT * FROM result WHERE result_id = ?;");
+    if (!execPrepared(q, {resultId})) return empty;
     if (q.next()) return recordToMap(q.record());
     return empty;
 }
@@ -517,15 +530,68 @@ QVector<QVariantMap> DatabaseManager::listResultsByParticipant(qint64 participan
     return v;
 }
 
-bool DatabaseManager::updateResult(qint64 questionId, qint64 participantId, bool result)
+bool DatabaseManager::updateResult(qint64 resultId, bool result)
 {
-    return addResult(questionId, participantId, result);
+    QSqlQuery q(m_db);
+    q.prepare("UPDATE result SET result = ? WHERE result_id = ?;");
+    return execPrepared(q, {result, resultId});
 }
 
-bool DatabaseManager::removeResult(qint64 questionId, qint64 participantId)
+bool DatabaseManager::removeResult(qint64 resultId)
 {
     if (!m_db.isOpen() && !open()) return false;
     QSqlQuery q(m_db);
-    q.prepare("DELETE FROM result WHERE question_id = ? AND participant_id = ?;");
-    return execPrepared(q, {questionId, participantId});
+    q.prepare("DELETE FROM result WHERE result_id = ?;");
+    return execPrepared(q, {resultId});
+}
+
+bool DatabaseManager::addEvent(qint64 quizId, const QString& title, const QDateTime &time, qint64 &outId)
+{
+    if (!m_db.isOpen() && !open()) return false;
+
+    QSqlQuery q(m_db);
+    q.prepare("INSERT INTO event (quiz_id, title, time) VALUES (?, ?, ?);");
+    if (!execPrepared(q, {quizId, title, time})) return false;
+    outId = q.lastInsertId().toLongLong();
+    return true;
+}
+
+QVariantMap DatabaseManager::getEvent(qint64 eventId)
+{
+    QVariantMap empty;
+    if (!m_db.isOpen() && !open()) return empty;
+
+    QSqlQuery q(m_db);
+    q.prepare("SELECT * FROM event WHERE event_id = ?;");
+    if (!execPrepared(q, {eventId})) return empty;
+    if (q.next()) return recordToMap(q.record());
+    return empty;
+}
+
+QVariantMap DatabaseManager::getEvent(const QDateTime &time)
+{
+    QVariantMap empty;
+    if (!m_db.isOpen() && !open()) return empty;
+
+    QSqlQuery q(m_db);
+    q.prepare("SELECT * FROM event WHERE time = ?;");
+    if (!execPrepared(q, {time})) return empty;
+    if (q.next()) return recordToMap(q.record());
+    return empty;
+}
+
+bool DatabaseManager::updateEvent(qint64 eventId, qint64 quizId, const QString& title, const QDateTime &time)
+{
+    if (!m_db.isOpen() && !open()) return false;
+    QSqlQuery q(m_db);
+    q.prepare("UPDATE event SET quiz_id = ?, title = ?, time = ? WHERE event_id = ?;");
+    return execPrepared(q, {quizId, title, time, eventId});
+}
+
+bool DatabaseManager::removeEvent(qint64 eventId)
+{
+    if (!m_db.isOpen() && !open()) return false;
+    QSqlQuery q(m_db);
+    q.prepare("DELETE FROM event WHERE event_id = ?;");
+    return execPrepared(q, {eventId});
 }

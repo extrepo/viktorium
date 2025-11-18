@@ -42,10 +42,10 @@ public:
     bool removeTeamUser(qint64 userId, qint64 teamId);
 
     // --- CRUD: quiz ---
-    bool addQuiz(bool type, const QString &topic, const QString &title, const QDateTime &time, qint64 timer, qint64 &outId);
+    bool addQuiz(bool type, const QString &topic, qint64 timer, qint64 &outId);
     QVariantMap getQuiz(qint64 quizId);
     QVector<QVariantMap> listQuizzes();
-    bool updateQuiz(qint64 quizId, bool type, const QString &topic, const QString &title, const QDateTime &time, qint64 timer);
+    bool updateQuiz(qint64 quizId, bool type, const QString &topic, qint64 timer);
     bool removeQuiz(qint64 quizId);
 
     // --- CRUD: question ---
@@ -63,18 +63,25 @@ public:
     bool removeAnswer(qint64 answerId);
 
     // --- CRUD: participant ---
-    bool addParticipant(qint64 quizId, qint64 userId, qint64 teamId, int number, qint64 &outId);
+    bool addParticipant(qint64 eventId, qint64 userId, qint64 teamId, int number, qint64 &outId);
     QVariantMap getParticipant(qint64 participantId);
-    QVector<QVariantMap> listParticipantsByQuiz(qint64 quizId);
-    bool updateParticipant(qint64 participantId, qint64 quizId, qint64 userId, qint64 teamId, int number);
+    QVector<QVariantMap> listParticipantsByEvent(qint64 eventId);
+    bool updateParticipant(qint64 participantId, qint64 eventId, qint64 userId, qint64 teamId, int number);
     bool removeParticipant(qint64 participantId);
 
     // --- CRUD: result ---
-    bool addResult(qint64 questionId, qint64 participantId, bool result);
-    QVariantMap getResult(qint64 questionId, qint64 participantId);
+    bool addResult(qint64 questionId, qint64 participantId, qint64 eventId, bool result, qint64 &outId);
+    QVariantMap getResult(qint64 resultId);
     QVector<QVariantMap> listResultsByParticipant(qint64 participantId);
-    bool updateResult(qint64 questionId, qint64 participantId, bool result);
-    bool removeResult(qint64 questionId, qint64 participantId);
+    bool updateResult(qint64 resultId, bool result);
+    bool removeResult(qint64 resultId);
+
+    // --- CRUD: event ---
+    bool addEvent(qint64 quizId, const QString& title, const QDateTime &time, qint64 &outId);
+    QVariantMap getEvent(qint64 eventId);
+    QVariantMap getEvent(const QDateTime &time);
+    bool updateEvent(qint64 eventId, qint64 quizId, const QString& title, const QDateTime &time);
+    bool removeEvent(qint64 eventId);
 
     // utility
     QString lastError() const { return m_lastError; }
