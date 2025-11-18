@@ -47,6 +47,7 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Gui CONFIG REQUIRED)
 find_package(Qt5Sql CONFIG REQUIRED)
+find_package(Qt5Network CONFIG REQUIRED)
 
 # Подгружаем необходимые библиотеки
 add_subdirectory(lib/unilog)
@@ -57,29 +58,27 @@ file(GLOB_RECURSE INCLUDES "include/*.h")
 
 # Подключение исходников
 file(GLOB_RECURSE SOURCES "src/*.cpp")
+list(FILTER SOURCES EXCLUDE REGEX "src/main.cpp")
 
 # Cоздание исполняемого файла проекта
-add_executable(${PROJECT_NAME} ${INCLUDES} ${SOURCES} ${UI} resources.qrc resources.rc)
+add_executable(${PROJECT_NAME} ${INCLUDES} ${SOURCES} "src/main.cpp" resources.qrc resources.rc)
 set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE true)
 install(TARGETS ${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_BINDIR}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_NAME="${PROJECT_NAME}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_link_libraries(${PROJECT_NAME} PUBLIC utils unilog Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Sql Qt5::Network)
 
 # Шаблоны
-
 install(FILES "install/welcome.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
 install(FILES "install/template1.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
 install(FILES "install/finish.html" DESTINATION "${CMAKE_INSTALL_BINDIR}/vikatemplates/")
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-    utils
-    unilog
-    Qt5::Widgets
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Sql
-)
+# Тесты
+add_executable(lmtest ${INCLUDES} ${SOURCES} "tests/lmtest.cpp" resources.qrc resources.rc)
+target_include_directories(lmtest PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_link_libraries(lmtest PUBLIC utils unilog Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Sql Qt5::Network)
+
 # Подготовка окружения для инсталлятора
 if(WIN32 AND APP_DEPLOYQT)
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
