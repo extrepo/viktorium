@@ -53,6 +53,17 @@ find_package(Qt5Network CONFIG REQUIRED)
 add_subdirectory(lib/unilog)
 add_subdirectory(lib/utils)
 
+set(THEMES_DIR "${CMAKE_SOURCE_DIR}/themes")
+set(THEMES_DEST_DIR_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/bin/debug/themes")
+set(THEMES_DEST_DIR_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/bin/release/themes")
+
+file(GLOB THEMES "${THEMES_DIR}/*.qss")
+foreach(THEME ${THEMES})
+    get_filename_component(THEME_NAME ${THEME} NAME)
+    configure_file(${THEME} ${THEMES_DEST_DIR_DEBUG}/${THEME_NAME} COPYONLY)
+    configure_file(${THEME} ${THEMES_DEST_DIR_RELEASE}/${THEME_NAME} COPYONLY)
+endforeach()
+
 # Подключение хэдеров
 file(GLOB_RECURSE INCLUDES "include/*.h")
 

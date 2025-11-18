@@ -1,0 +1,239 @@
+
+/* ---------- Общие переменные ----------
+   Цвета:
+     - основной фон:     #F7F9FB
+     - карточки/панели:  #FFFFFF
+     - сайдбар:          #F1F4F8
+     - превью:           #D7ECFF
+     - акцент (primary): #2F80ED
+     - muted / borders:  #E6E9EE
+     - текст:            #222834
+-------------------------------------------------------------------------*/
+
+/* Общее окно и базовые виджеты */
+QWidget {
+    background-color: #F5F6FA;
+    color: #222834;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+}
+
+/* Header (верхняя панель) */
+HeaderWidget {
+    background-color: #FFFFFF;
+}
+
+HeaderWidget QLabel {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Сайдбар (левая панель) */
+SidebarWidget {
+    background-color: #FFFFFF;
+    border-right: 1px solid #E6E9EE;
+}
+
+/* Превью (правая панель) — отладочный фон */
+PreviewWidget {
+    background-color: #D7ECFF;
+    border-left: 1px solid #E6E9EE;
+}
+
+/* Центр-контейнер / карточки */
+QFrame#card, QWidget.card {
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid #E6E9EE;
+    padding: 12px;
+}
+
+/* ---------- QTableView: общие настройки ---------- */
+QTableView {
+    background-color: #FFFFFF;
+    border: none;
+    gridline-color: #F1F4F8;
+    selection-background-color: #E6F0FF; /* светлый акцент */
+    selection-color: #0B2B4A;
+    show-decoration-selected: 1;
+}
+
+/* Заголовки таблицы */
+QHeaderView::section {
+    background-color: transparent;
+    color: #2B3440;
+    padding: 12px 8px;
+    border: none;
+    border-bottom: 1px solid #E6E9EE;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+    min-height: 48px;
+}
+
+/* Вертикальный заголовок (скрываем, если не нужен) */
+QTableView QHeaderView::section:vertical {
+    background: transparent;
+    border: none;
+}
+
+/* Строки: высота и разделители
+   Учтите: точную высоту строки лучше задавать в коде:
+   tableView->verticalHeader()->setDefaultSectionSize(56);
+*/
+QTableView::item {
+    padding: 12px;
+}
+
+/* Альтернативная заливка строк */
+QTableView::item:alternate {
+    background-color: #FBFDFF;
+}
+
+/* Выделенная строка */
+QTableView QTableView::item:selected,
+QTableView::item:selected {
+    background-color: #E6F0FF;
+    color: #0B2B4A;
+}
+
+/* Ячейки с удалёнными границами (чтобы был мягкий вид) */
+QTableView::item {
+    border-bottom: 1px solid #F4F6F8;
+}
+
+/* ---------- QPushButton: общий стиль ---------- */
+QPushButton {
+    background-color: #F4F6F8;
+    color: #122233;
+    border: 1px solid #E6E9EE;
+    border-radius: 8px;
+    padding: 8px 14px;
+    min-height: 36px;
+    font-size: 13px;
+    outline: none;
+}
+
+/* Hover / Pressed */
+QPushButton:hover {
+    background-color: #EEF4FF;
+}
+
+QPushButton:pressed {
+    background-color: #E6EEFF;
+}
+
+/* Disabled */
+QPushButton:disabled {
+    background-color: #FAFBFC;
+    color: #9AA3AF;
+    border-color: #F0F2F4;
+}
+
+/* Специальная кнопка «Создать» — яркая primary */
+QPushButton#createEventButton,
+QPushButton.create-button,
+QPushButton#btnCreate {
+    background-color: #2F80ED;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 600;
+}
+
+QPushButton#createEventButton:hover,
+QPushButton.create-button:hover {
+    background-color: #1F6FE0;
+}
+
+/* Кнопки нижней панели (слева/снизу) — более тонкие */
+QWidget#bottomButtons QPushButton {
+    min-width: 120px;
+}
+
+/* ---------- Sidebar: кнопки и активное состояние ---------- */
+/* Обычные кнопки сайдбара (вертикальный список). Предполагаем QPushButton или QToolButton внутри SidebarWidget */
+SidebarWidget QPushButton {
+    background-color: #FFFFFF;
+    border: none;
+    text-align: left;
+    padding: 12px 16px;
+    margin: 4px 8px;
+    border-radius: 8px;
+    color: #253241;
+    font-size: 14px;
+}
+
+/* Hover для пунктов сайдбара */
+SidebarWidget QPushButton:hover {
+    background-color: rgba(47,128,237,0.08);
+}
+
+/* Активный пункт (checked) */
+SidebarWidget QPushButton:checked,
+SidebarWidget QPushButton[active="true"] {
+    background-color: rgba(47,128,237,0.14);
+    color: #13407A;
+    font-weight: 700;
+    border-left: 4px solid #2F80ED;
+    padding-left: 12px;
+}
+
+/* ---------- Превью (правый блок) ---------- */
+PreviewWidget QLabel.title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #112233;
+    margin-bottom: 6px;
+}
+
+PreviewWidget QLabel.subtitle {
+    font-size: 13px;
+    color: #4B5666;
+}
+
+/* Карточка пустого превью (центрирование) */
+PreviewWidget QWidget#emptyPreview {
+    background: transparent;
+}
+
+/* ---------- Мелкие утилиты ---------- */
+QLineEdit, QTextEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #E6E9EE;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+/* Подсказки (placeholder) */
+QLineEdit[placeholderText] {
+    color: #9AA3AF;
+}
+
+/* ScrollBar — легкий минималистичный стиль */
+QScrollBar:vertical {
+    background: transparent;
+    width: 10px;
+    margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #D1D9E6;
+    min-height: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    height: 0;
+}
+
+/* Tooltip */
+QToolTip {
+    background-color: #2B3440;
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 4px;
+    opacity: 230;
+}
