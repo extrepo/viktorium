@@ -20,7 +20,7 @@ public:
     }
 };
 
-bool ReportHelper::reportQuiz(quint64 id, QWidget *parent)
+bool ReportHelper::reportQuiz(quint64 id)
 {
     QString fileName =  QString::fromStdString(Settings::dbDir()) + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".html";
     QFile file(fileName);
@@ -80,20 +80,128 @@ bool ReportHelper::reportQuiz(quint64 id, QWidget *parent)
     return true;
 }
 
-QString ReportHelper::readFile(const QString &filePath) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return QString();
-    QTextStream in(&file);
-    QString content = in.readAll();
+bool ReportHelper::reportTeams(QDateTime dateFrom, QDateTime dateTo)
+{
+    QString fileName =  QString::fromStdString(Settings::dbDir()) + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".html";
+    QFile file(fileName);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        G_ERROR() << "Could not create file:" << file.errorString();
+        QMessageBox::critical(nullptr, "Ошибка", "Невозможно создать файл отчета");
+        return false;
+    }
+    UnicodedStream out(&file);
+    out.setCodec("UTF-8");
+    out << "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Результаты команды</title></head><body>\r\n";
+    //
+    DatabaseManager* db = &DatabaseManager::instance();
+    auto rteams = db->resultTeams(dateFrom, dateTo);
+    QString teamTitle;
+    int quizId = -1;
+    int games = 0;
+    int points = 0;
+    int totalPoints = 0;
+    out << "Командные результаты с " << dateFrom.toString("dd.MM.yyyy") << " по " << dateTo.toString("dd.MM.yyyy");
+    out << "<table border=1>";
+    out << "<th><td>Команда</td><td>Игры</td><td>Баллы</td><td>%</td></th>\r\n";
+    for(auto& r : rteams) {
+        if(r["title"].toString() != teamTitle) {
+            if(!teamTitle.isEmpty()) {
+                out << "<tr>";
+                out << "<td>"<< teamTitle << "</td>";
+                out << "<td>" << games << "</td>";
+                out << "<td>" << points << "</td>";
+                out << "<td>" << (totalPoints > 0 ? 100*points/totalPoints : 0) << "</td>";
+                out << "</tr>\r\n";
+            }
+            teamTitle = r["title"].toString();
+            quizId = -1;
+            games = 0;
+            points = 0;
+            totalPoints = 0;
+        }
+        if(quizId != r["quiz_id"].toInt()) {
+            games++;
+            quizId = r["quiz_id"].toInt();
+        }
+        totalPoints += r["points"].toInt();
+        if(r["result"].toInt() > 0) points += r["points"].toInt();
+    }
+    if(!teamTitle.isEmpty()) {
+        out << "<tr>";
+        out << "<td>"<< teamTitle << "</td>";
+        out << "<td>" << games << "</td>";
+        out << "<td>" << points << "</td>";
+        out << "<td>" << (totalPoints > 0 ? 100*points/totalPoints : 0) << "</td>";
+        out << "</tr>\r\n";
+    }
+    out << "</table></body></html>\r\n";
     file.close();
-    return content;
+    // Открываем браузер
+    QUrl url = QUrl::fromLocalFile(fileName);
+    QDesktopServices::openUrl(url);
+    return true;
 }
 
-bool ReportHelper::writeFile(const QString &filePath, const QString &content) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return false;
-    QTextStream out(&file);
-    out << content;
+static bool reportUsers(QDateTime dateFrom, QDateTime dateTo)
+{
+    QString fileName =  QString::fromStdString(Settings::dbDir()) + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".html";
+    QFile file(fileName);
+    if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        G_ERROR() << "Could not create file:" << file.errorString();
+        QMessageBox::critical(nullptr, "Ошибка", "Невозможно создать файл отчета");
+        return false;
+    }
+    UnicodedStream out(&file);
+    out.setCodec("UTF-8");
+    out << "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Результаты участника</title></head><body>\r\n";
+    //
+    DatabaseManager* db = &DatabaseManager::instance();
+    auto rteams = db->resultUsers(dateFrom, dateTo);
+    QString userTitle;
+    int userId = -1;
+    int quizId = -1;
+    int games = 0;
+    int points = 0;
+    int totalPoints = 0;
+    out << "Личные результаты с " << dateFrom.toString("dd.MM.yyyy") << " по " << dateTo.toString("dd.MM.yyyy");
+    out << "<table border=1>";
+    out << "<th><td>Участник</td><td>Игры</td><td>Баллы</td><td>%</td></th>\r\n";
+    for(auto& r : rteams) {
+        if(r["user_id"].toInt() != userId) {
+            if(userId != -1) {
+                out << "<tr>";
+                out << "<td>"<< userTitle << "</td>";
+                out << "<td>" << games << "</td>";
+                out << "<td>" << points << "</td>";
+                out << "<td>" << (totalPoints > 0 ? 100*points/totalPoints : 0) << "</td>";
+                out << "</tr>\r\n";
+            }
+            userId = r["user_id"].toInt();
+            userTitle = r["name"].toString() + " " + r["father_name"].toString() + " " + r["surname"].toString();
+            quizId = -1;
+            games = 0;
+            points = 0;
+            totalPoints = 0;
+        }
+        if(quizId != r["quiz_id"].toInt()) {
+            games++;
+            quizId = r["quiz_id"].toInt();
+        }
+        totalPoints += r["points"].toInt();
+        if(r["result"].toInt() > 0) points += r["points"].toInt();
+    }
+    if(!userTitle.isEmpty()) {
+        out << "<tr>";
+        out << "<td>"<< userTitle << "</td>";
+        out << "<td>" << games << "</td>";
+        out << "<td>" << points << "</td>";
+        out << "<td>" << (totalPoints > 0 ? 100*points/totalPoints : 0) << "</td>";
+        out << "</tr>\r\n";
+    }
+    out << "</table></body></html>\r\n";
     file.close();
+    // Открываем браузер
+    QUrl url = QUrl::fromLocalFile(fileName);
+    QDesktopServices::openUrl(url);
     return true;
 }

@@ -606,3 +606,46 @@ bool DatabaseManager::removeEvent(qint64 eventId)
     q.prepare("DELETE FROM event WHERE event_id = ?;");
     return execPrepared(q, {eventId});
 }
+
+QVector<QVariantMap> DatabaseManager::resultTeams(const QDateTime dateFrom, const QDateTime dateTo)
+{
+    QVector<QVariantMap> v;
+    if (!m_db.isOpen() && !open()) return v;
+    QSqlQuery q(m_db);
+    q.prepare(R"sql(
+        SELECT team.title as title, quiz.quiz_id as quiz_id, question.points as points, result.result as result
+        FROM team, participant, event, quiz, question, result
+        WHERE team.team_id=participant.team_id AND event.event_id=participant.event_id AND quiz.quiz_id=event.quiz_id
+        AND question.quiz_id=quiz.quiz_id AND result.question_id=question.question_id and result.participant_id=participant.participant_id
+        AND event.time >= ? AND event.time <= ?
+        ORDER BY team.team_id, quiz.quiz_id;
+    )sql");
+    if (!execPrepared(q, {dateFrom, dateTo})) return v;
+    while (q.next()) v.append(recordToMap(q.record()));
+    return v;
+}
+
+QVector<QVariantMap> DatabaseManager::resultUsers(const QDateTime dateFrom, const QDateTime dateTo)
+{
+    QVector<QVariantMap> v;
+    if (!m_db.isOpen() && !open()) return v;
+    QSqlQuery q(m_db);
+    q.prepare(R"sql(
+        SELECT user.user_id as user_id, user.name as name, user.father_name as father_name, user.surname as surname, quiz.quiz_id as quiz_id, question.points as points, result.result as result
+        FROM user, participant, event, quiz, question, result
+        WHERE user.user_id=participant.user_id AND event.event_id=participant.event_id AND quiz.quiz_id=event.quiz_id
+        AND question.quiz_id=quiz.quiz_id AND result.question_id=question.question_id and result.participant_id=participant.participant_id
+        AND event.time >= ? AND event.time <= ?
+		    UNION
+        SELECT user.user_id as user_id, user.name as name, user.father_name as father_name, user.surname as surname, quiz.quiz_id as quiz_id, question.points as points, result.result as result
+        FROM user, team, team_user, participant, event, quiz, question, result
+        WHERE team.team_id=participant.team_id AND event.event_id=participant.event_id AND quiz.quiz_id=event.quiz_id AND team_user.team_id = team.team_id AND team_user.user_id = user.user_id
+        AND question.quiz_id=quiz.quiz_id AND result.question_id=question.question_id and result.participant_id=participant.participant_id
+        AND event.time >= ? AND event.time <= ?
+        ORDER BY user.user_id, user.father_name, user.surname, quiz.quiz_id;
+    )sql");
+    if (!execPrepared(q, {dateFrom, dateTo, dateFrom, dateTo})) return v;
+    while (q.next()) v.append(recordToMap(q.record()));
+    return v;
+}
+

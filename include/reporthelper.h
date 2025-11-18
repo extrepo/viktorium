@@ -16,9 +16,13 @@ public:
     /**
      * Отчет по eventId
      */
-    static bool reportQuiz(quint64 id, QWidget *parent = nullptr);
-
-protected:
-    static QString readFile(const QString &filePath);
-    static bool writeFile(const QString &filePath, const QString &content);
+    static bool reportQuiz(quint64 id);
+    /**
+     * Отчет по командам
+     */
+    static bool reportTeams(QDateTime dateFrom, QDateTime dateTo);
+    /**
+     * Отчет по участникам
+     */
+    static bool reportUsers(QDateTime dateFrom, QDateTime dateTo);
 };

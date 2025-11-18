@@ -84,6 +84,10 @@ public:
     bool updateEvent(qint64 eventId, qint64 quizId, const QString& title, const QDateTime &time);
     bool removeEvent(qint64 eventId);
 
+    // --- Reports ---
+    QVector<QVariantMap> resultTeams(const QDateTime dateFrom, const QDateTime dateTo);
+    QVector<QVariantMap> resultUsers(const QDateTime dateFrom, const QDateTime dateTo);
+
     // utility
     QString lastError() const { return m_lastError; }
     QSqlDatabase database() const { return m_db; }
