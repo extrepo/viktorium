@@ -5,6 +5,8 @@
 #include "utils/utils.h"
 #include "mainwindow.h"
 
+#include "databasemanager.h"
+
 int main(int argc, char *argv[])
 {
     // Настройка логирования
@@ -21,10 +23,22 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
+    DatabaseManager& db = DatabaseManager::instance();
+    if (!db.open()) {
+        G_ERROR() << "Failed to open database.";
+        return -1;
+    }
+    if (!db.createTables()) {
+        G_ERROR() << "Failed to create tables.";
+        return -1;
+    }
+    G_INFO() << "База готова к работе.";
+
     MainWindow w;
     w.show();
 
     int ret = a.exec();
     UniLog::getInstance().shutdown();
+    DatabaseManager::instance().close();
     return ret;
 }
