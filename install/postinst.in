@@ -2,6 +2,6 @@
 
 [ "$1" = "configure" ] || exit 0
 
-sudo -u $SUDO_USER xdg-desktop-icon install @CMAKE_INSTALL_PREFIX@/share/applications/@PROJECT_NAME@.desktop
+sudo -u $SUDO_USER xdg-desktop-icon install @CMAKE_INSTALL_PREFIX@/share/applications/eleron-@PROJECT_NAME@.desktop
 
 ldconfig
