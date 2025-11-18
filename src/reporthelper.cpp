@@ -60,9 +60,9 @@ bool ReportHelper::reportQuiz(quint64 id)
         return a.second > b.second; // убывание значений
     });
     // Выводим результат
-    out << "<table border=1><th>";
+    out << "<table border=1><tr>";
     out << "<td>" <<(quiz["type"].toInt() == 1 ? "Команда" : "Участник") << "</td>";
-    out << "<td>Набрано баллов</td></th>\r\n";
+    out << "<td>Набрано баллов</td></tr>\r\n";
     for (const auto& p : tv) {
         out << "<tr>";
         auto participant = db->getParticipant(p.second);
@@ -102,7 +102,7 @@ bool ReportHelper::reportTeams(QDateTime dateFrom, QDateTime dateTo)
     int totalPoints = 0;
     out << "Командные результаты с " << dateFrom.toString("dd.MM.yyyy") << " по " << dateTo.toString("dd.MM.yyyy");
     out << "<table border=1>";
-    out << "<th><td>Команда</td><td>Игры</td><td>Баллы</td><td>%</td></th>\r\n";
+    out << "<tr><td>Команда</td><td>Игры</td><td>Баллы</td><td>%</td></tr>\r\n";
     for(auto& r : rteams) {
         if(r["title"].toString() != teamTitle) {
             if(!teamTitle.isEmpty()) {
@@ -128,7 +128,7 @@ bool ReportHelper::reportTeams(QDateTime dateFrom, QDateTime dateTo)
     }
     if(!teamTitle.isEmpty()) {
         out << "<tr>";
-        out << "<td>"<< teamTitle << "</td>";
+        out << "<td>" << teamTitle << "</td>";
         out << "<td>" << games << "</td>";
         out << "<td>" << points << "</td>";
         out << "<td>" << (totalPoints > 0 ? 100*points/totalPoints : 0) << "</td>";
@@ -141,8 +141,7 @@ bool ReportHelper::reportTeams(QDateTime dateFrom, QDateTime dateTo)
     QDesktopServices::openUrl(url);
     return true;
 }
-
-static bool reportUsers(QDateTime dateFrom, QDateTime dateTo)
+bool ReportHelper::reportUsers(QDateTime dateFrom, QDateTime dateTo)
 {
     QString fileName =  QString::fromStdString(Settings::dbDir()) + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".html";
     QFile file(fileName);
@@ -165,7 +164,7 @@ static bool reportUsers(QDateTime dateFrom, QDateTime dateTo)
     int totalPoints = 0;
     out << "Личные результаты с " << dateFrom.toString("dd.MM.yyyy") << " по " << dateTo.toString("dd.MM.yyyy");
     out << "<table border=1>";
-    out << "<th><td>Участник</td><td>Игры</td><td>Баллы</td><td>%</td></th>\r\n";
+    out << "<tr><td>Участник</td><td>Игры</td><td>Баллы</td><td>%</td></tr>\r\n";
     for(auto& r : rteams) {
         if(r["user_id"].toInt() != userId) {
             if(userId != -1) {

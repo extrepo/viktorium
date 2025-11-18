@@ -308,7 +308,7 @@ bool DatabaseManager::addQuiz(bool type, const QString &topic, qint64 timer, qin
 {
     if (!m_db.isOpen() && !open()) return false;
     QSqlQuery q(m_db);
-    q.prepare("INSERT INTO quiz (type, topic, timer) VALUES (?, ?, ?, ?, ?);");
+    q.prepare("INSERT INTO quiz (type, topic, timer) VALUES (?, ?, ?);");
     if (!execPrepared(q, { type ? 1 : 0, topic, timer })) return false;
     outId = q.lastInsertId().toLongLong();
     return true;
@@ -502,7 +502,7 @@ bool DatabaseManager::addResult(qint64 questionId, qint64 participantId, qint64 
 {
     if (!m_db.isOpen() && !open()) return false;
     QSqlQuery q(m_db);
-    q.prepare("INSERT OR REPLACE INTO result (question_id, participant_id, event_id, result) VALUES (?, ?, ?);");
+    q.prepare("INSERT OR REPLACE INTO result (question_id, participant_id, event_id, result) VALUES (?, ?, ?, ?);");
     if (!execPrepared(q, {questionId, participantId, eventId, result ? 1 : 0})) return false;
     outId = q.lastInsertId().toLongLong();
     return true;
@@ -636,12 +636,12 @@ QVector<QVariantMap> DatabaseManager::resultUsers(const QDateTime dateFrom, cons
         WHERE user.user_id=participant.user_id AND event.event_id=participant.event_id AND quiz.quiz_id=event.quiz_id
         AND question.quiz_id=quiz.quiz_id AND result.question_id=question.question_id and result.participant_id=participant.participant_id
         AND event.time >= ? AND event.time <= ?
-		    UNION
+		     UNION
         SELECT user.user_id as user_id, user.name as name, user.father_name as father_name, user.surname as surname, quiz.quiz_id as quiz_id, question.points as points, result.result as result
         FROM user, team, team_user, participant, event, quiz, question, result
         WHERE team.team_id=participant.team_id AND event.event_id=participant.event_id AND quiz.quiz_id=event.quiz_id AND team_user.team_id = team.team_id AND team_user.user_id = user.user_id
         AND question.quiz_id=quiz.quiz_id AND result.question_id=question.question_id and result.participant_id=participant.participant_id
-        AND event.time >= ? AND event.time <= ?
+        synAND event.time >= ? AND event.time <= ?
         ORDER BY user.user_id, user.father_name, user.surname, quiz.quiz_id;
     )sql");
     if (!execPrepared(q, {dateFrom, dateTo, dateFrom, dateTo})) return v;

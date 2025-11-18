@@ -86,6 +86,10 @@ add_executable(dbtest ${INCLUDES} ${SOURCES} "tests/dbtest.cpp" resources.qrc re
 target_include_directories(dbtest PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 target_link_libraries(dbtest PUBLIC utils unilog Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Sql Qt5::Network)
 
+add_executable(resulttest ${INCLUDES} ${SOURCES} "tests/resulttest.cpp" resources.qrc resources.rc)
+target_include_directories(resulttest PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+target_link_libraries(resulttest PUBLIC utils unilog Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Sql Qt5::Network)
+
 # Подготовка окружения для инсталлятора
 if(WIN32 AND APP_DEPLOYQT)
     find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_BIN_DIR}")
