@@ -38,6 +38,12 @@ QuizPreViewWidget::QuizPreViewWidget(QWidget *parent): QWidget(parent)
 
 void QuizPreViewWidget::onTableRowClicked(int index)
 {
+    if (index == -1) {
+        this->hide();
+        return;
+    }
+    this->show();
+
     DatabaseManager& db = DatabaseManager::instance();
 
     QVariantMap event = db.getQuiz(index);

@@ -197,6 +197,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QSplitter* eventSplitter = new QSplitter(Qt::Horizontal);
     preview = new PreViewWidget(eventSplitter);
+    preview->onTableRowClicked(-1);
     eventSplitter->setHandleWidth(3);
     eventSplitter->addWidget(createEventWidget());
     eventSplitter->addWidget(preview);
@@ -205,6 +206,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QSplitter* quizSplitter = new QSplitter(Qt::Horizontal);
     quizPreview = new QuizPreViewWidget(quizSplitter);
+    quizPreview->onTableRowClicked(-1);
     quizSplitter->setHandleWidth(3);
     quizSplitter->addWidget(createQuizWidget());
     quizSplitter->addWidget(quizPreview);

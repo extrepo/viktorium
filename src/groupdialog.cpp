@@ -99,7 +99,6 @@ void GroupDialog::setGroup(const Group& g) {
     m_nameEdit->setText(g.name);
     m_memberIds = g.memberIds;
 
-    // fill membersView
     QStandardItemModel* m = qobject_cast<QStandardItemModel*>(m_membersView->model());
     m->clear();
     DatabaseManager &bd = DatabaseManager::instance();
@@ -115,15 +114,6 @@ void GroupDialog::setGroup(const Group& g) {
         it->setData(member["user_id"].toInt(), Qt::UserRole);
         m->appendRow(it);
     }
-
-
-
-    // for (int uid : m_memberIds) {
-    //     QVariantMap user = bd.getUser(uid);
-    //     QStandardItem* it = new QStandardItem(user.value("surname").toString() + " " + user.value("name").toString());
-    //     it->setData(uid, Qt::UserRole);
-    //     m->appendRow(it);
-    // }
 }
 
 Group GroupDialog::resultGroup() const {
@@ -139,7 +129,6 @@ void GroupDialog::onAddSelectedPerson() {
     if (!idx.isValid()) return;
     QModelIndex src = m_proxy->mapToSource(idx);
     int row = src.row();
-    //Person p = m_peopleModel->personAt(row);
 
     int userId = m_peopleModel->data(src, Qt::UserRole).toInt();
 

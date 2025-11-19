@@ -74,6 +74,11 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
 void PreViewWidget::onTableRowClicked(int index)
 {
     eventId = index;
+    if (index == -1) {
+        this->hide();
+        return;
+    }
+    this->show();
 
     participantSelectorWidget->update(index);
 
