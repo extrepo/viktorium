@@ -41,17 +41,17 @@ GroupManagerWidget::GroupManagerWidget(QWidget* parent)
     m_createBtn = new QPushButton("Новая команда", this);
     m_editBtn = new QPushButton("Редактировать", this);
     m_deleteBtn = new QPushButton("Удалить", this);
-    m_refreshBtn = new QPushButton("Обновить", this);
 
     QHBoxLayout* topButtons = new QHBoxLayout;
     topButtons->addWidget(m_createBtn);
     topButtons->addWidget(m_editBtn);
     topButtons->addWidget(m_deleteBtn);
     topButtons->addStretch();
-    topButtons->addWidget(m_refreshBtn);
 
     QVBoxLayout* main = new QVBoxLayout(this);
-    main->addWidget(new QLabel("Команды:"));
+    QLabel* comandTitle = new QLabel("Команды");
+    comandTitle->setProperty("cssClass", "subtitle");
+    main->addWidget(comandTitle);
     main->addWidget(m_searchGroups);
     main->addWidget(m_groupsView);
     main->addLayout(topButtons);
@@ -61,7 +61,6 @@ GroupManagerWidget::GroupManagerWidget(QWidget* parent)
     connect(m_createBtn, &QPushButton::clicked, this, &GroupManagerWidget::onCreateGroup);
     connect(m_editBtn, &QPushButton::clicked, this, &GroupManagerWidget::onEditGroup);
     connect(m_deleteBtn, &QPushButton::clicked, this, &GroupManagerWidget::onDeleteGroup);
-    connect(m_refreshBtn, &QPushButton::clicked, this, &GroupManagerWidget::onRefresh);
 }
 
 void GroupManagerWidget::onCreateGroup() {

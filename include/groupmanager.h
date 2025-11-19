@@ -28,6 +28,5 @@ private:
     QPushButton* m_createBtn;
     QPushButton* m_editBtn;
     QPushButton* m_deleteBtn;
-    QPushButton* m_refreshBtn;
     QSortFilterProxyModel* m_groupsProxy;
 };

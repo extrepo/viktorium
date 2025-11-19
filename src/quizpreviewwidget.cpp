@@ -14,7 +14,9 @@ QuizPreViewWidget::QuizPreViewWidget(QWidget *parent): QWidget(parent)
 
     title = new QLabel("Мероприятиe", this);
     title->setProperty("cssClass", "title");
-    title->setAlignment(Qt::AlignCenter);
+    title->setAlignment(Qt::AlignLeft);
+    title->setWordWrap(true);
+    title->setFixedWidth(200);   // твоя фиксированная ширина
 
     QLabel* timerLabel = new QLabel("Таймер");
     timerLabel->setProperty("cssClass", "title2");

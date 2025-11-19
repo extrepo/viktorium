@@ -21,8 +21,10 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
 
     title = new QLabel("Мероприятиe", this);
     title->setProperty("cssClass", "title");
-    title->setAlignment(Qt::AlignCenter);
-    type = new QLabel("Индивидуальный", this);
+    title->setAlignment(Qt::AlignLeft);
+    title->setWordWrap(true);
+    title->setFixedWidth(200);   // твоя фиксированная ширина
+    type = new QLabel("Индивидуальный квиз", this);
     type->setProperty("cssClass", "subtitle");
     type->setAlignment(Qt::AlignCenter);
     generateButton = new QPushButton("Сформировать демонстрацию");
@@ -81,11 +83,11 @@ void PreViewWidget::onTableRowClicked(int index)
 
     title->setText(event["title"].toString());
     if (event["type"].toInt() == 0) {
-        type->setText("Индивидуальный");
+        type->setText("Индивидуальный квиз");
         participantSelectorWidget->show();
         groupmanagetWidget->hide();
     } else {
-        type->setText("Командный");
+        type->setText("Командный квиз");
         participantSelectorWidget->hide();
         groupmanagetWidget->show();
     }
