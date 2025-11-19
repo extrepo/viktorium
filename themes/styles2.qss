@@ -56,25 +56,24 @@ QWidget[cssClass="container"] {
 
 /* Стилизация области содержимого (pane) */
 #mainTabWidget::pane {
-	background: #FFFFFF;
-	border: 1px solid #F5F8FC;
-	border-radius: 16px;
-	padding: 12px;
-	margin: 10px;
-	border: 1px solid #E6E9EE;
+	background: transparent;
+	border: none;
 }
 
 #previewWidget {
-	background: #FFFFFF;
-	border: 1px solid #F5F8FC;
-	border-radius: 16px;
+	background-color: #FFFFFF;
 	padding: 12px;
 	margin: 10px;
+	border-radius: 16px;
 	border: 1px solid #E6E9EE;
 }
 
 #eventWidget {
 	background-color: #FFFFFF;
+	padding: 12px;
+	margin: 10px;
+	border-radius: 16px;
+	border: 1px solid #E6E9EE;
 }
 
 QLabel[cssClass = "title"] {

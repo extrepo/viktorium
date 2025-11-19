@@ -19,7 +19,7 @@ int EventsModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    return 5; // id, title, date, type, participant
+    return 4; // id, title, date, type
 }
 
 QVariant EventsModel::data(const QModelIndex &index, int role) const
@@ -39,7 +39,6 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
             case 0: return "индивидуальный";
             case 1: return "командный";
             }
-        case 4: return ev.participantNum;
         }
 
     }
@@ -55,7 +54,6 @@ QVariant EventsModel::headerData(int section, Qt::Orientation orientation, int r
         case 1: return "Название";
         case 2: return "Время";
         case 3: return "Тип";
-        case 4: return QStringLiteral("Количество\nучастников");;
         }
     }
     return QVariant();
@@ -85,14 +83,12 @@ void EventsModel::loadSampleData()
     }
 
     while (query.next()) {
-
         Event ev;
         ev.id = query.value("event_id").toInt();
         ev.title = query.value("title").toString();
         //ev.date = QDateTime::fromString(query.value("time").toString(), "yyyy-MM-dd");
         ev.date = QDateTime::fromSecsSinceEpoch(query.value("time").toLongLong());
         ev.type = query.value("type").toInt(); // если тип зависит от quiz_id
-        ev.participantNum = 0; // если нет колонки участников, можно оставить 0 или загрузить отдельно
 
         m_events.append(ev);
     }

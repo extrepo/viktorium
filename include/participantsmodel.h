@@ -9,19 +9,20 @@
 #include <QListView>
 #include <QSortFilterProxyModel>
 #include <QDialog>
+#include <QStandardItemModel>
 
 struct Person {
-    QString firstName;
-    QString lastName;
-    QString middleName; // optional
+    QString surName;
+    QString name;
+    QString fatherName; // optional
 
 
     QString displayName() const {
         // "Last First Middle" (omit empty parts)
         QStringList parts;
-        if (!lastName.isEmpty()) parts << lastName;
-        if (!firstName.isEmpty()) parts << firstName;
-        if (!middleName.isEmpty()) parts << middleName;
+        if (!surName.isEmpty()) parts << surName;
+        if (!name.isEmpty()) parts << name;
+        if (!fatherName.isEmpty()) parts << fatherName;
         return parts.join(' ');
     }
 };
@@ -73,6 +74,8 @@ public:
 
     QList<Person> selectedParticipants() const;
 
+    void update(int eventid);
+
 signals:
     void participantsChanged(const QList<Person>& list);
 
@@ -85,12 +88,14 @@ private slots:
 private:
     ParticipantsModel* m_participantsModel;
 
+    int eventId = 0;
 
     QLineEdit* m_search;
     QListView* m_peopleView;
     QListView* m_participantsView;
     QSortFilterProxyModel* m_proxy;
     QPushButton* m_addNewBtn;
+    QStandardItemModel* m_peopleModel;
 };
 
 

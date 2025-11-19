@@ -1,7 +1,8 @@
 #include "mainwindow.h"
 #include "databasemanager.h"
 #include "createeventdialog.h"
-#include "participantsmodel.h"
+#include "createquizdialog.h"
+
 
 #include <QHeaderView>
 #include <QFile>
@@ -156,104 +157,6 @@ void SidebarWidget::setActiveIndex(int index)
     emit activeIndexChanged(index);
 }
 
-PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
-{
-    setObjectName("previewWidget");
-    QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(30, 30, 30, 30);
-    layout->setSpacing(5);
-    setAttribute(Qt::WA_StyledBackground, true);
-
-    QWidget* titleContainer = new QWidget(this);
-    titleContainer->setProperty("cssClass", "container");
-    QHBoxLayout* titleLayout = new QHBoxLayout(titleContainer);
-    titleLayout->setContentsMargins(0, 0, 0, 0);
-
-    title = new QLabel("Мероприятиe", this);
-    title->setProperty("cssClass", "title");
-    title->setAlignment(Qt::AlignCenter);
-    type = new QLabel("Индивидуальный", this);
-    type->setProperty("cssClass", "subtitle");
-    type->setAlignment(Qt::AlignCenter);
-
-    date = new QLabel();
-    date->setProperty("cssClass", "date");
-    time = new QLabel();
-    time->setProperty("cssClass", "time");
-
-    titleLayout->addWidget(title, 0, Qt::AlignRight | Qt::AlignVCenter);
-    titleLayout->addWidget(type, 0, Qt::AlignRight | Qt::AlignVCenter);
-    titleLayout->addStretch();
-
-    QLabel* quizLabel = new QLabel("Квиз");
-    quizLabel->setProperty("cssClass", "title2");
-
-    quizComboBox = new QComboBox();
-    quizComboBox->setEditable(false);
-    quizComboBox->setEnabled(false);
-
-    QLabel* participantsLabel = new QLabel("Участники");
-    participantsLabel->setProperty("cssClass", "title2");
-
-    participantSelectorWidget = new ParticipantSelectorWidget(this);
-
-    // Добавить участников из базы
-//    participantsWidget->addExistingParticipant({"Иван", "Иванов", "Иванович"});
-//    participantsWidget->addExistingParticipant({"Петр", "Петров", ""});
-
-
-    QLabel* settingsLabel = new QLabel("Настройки");
-    settingsLabel->setProperty("cssClass", "title2");
-
-    layout->addWidget(titleContainer);
-    layout->addWidget(date);
-    layout->addWidget(time);
-    layout->addWidget(quizLabel);
-    layout->addWidget(quizComboBox);
-    layout->addWidget(participantsLabel);
-    layout->addWidget(participantSelectorWidget);
-    layout->addStretch();
-    layout->addWidget(settingsLabel);
-    layout->addStretch();
-}
-
-void PreViewWidget::onTableRowClicked(int index)
-{
-    DatabaseManager& db = DatabaseManager::instance();
-
-    QVariantMap event = db.getEvent(index);
-
-    QLocale ru(QLocale::Russian);
-
-    title->setText(event["title"].toString());
-    type->setText(event["type"].toInt() == 0 ? "Индивидуальный" : "Командный");
-    QDateTime dateTime = QDateTime::fromSecsSinceEpoch(event["time"].toLongLong());
-    date->setText(ru.toString(dateTime.date(), "d MMMM yyyy"));
-    time->setText(dateTime.time().toString("HH:mm"));
-
-    //QVariantMap quiz = db.getQuiz(event["quiz_id"].toInt());
-    QVector<QVariantMap> quizes = db.listQuizzes();
-
-    QStandardItemModel *model = new QStandardItemModel(this);
-    for (const auto&q : quizes) {
-        QStandardItem *item = new QStandardItem(q["topic"].toString());
-        item->setData(q["quiz_id"].toInt(), Qt::UserRole);        // userData сюда
-        model->appendRow(item);
-    }
-
-    QSortFilterProxyModel *proxy = new QSortFilterProxyModel(this);
-    proxy->setSourceModel(model);
-    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    proxy->setFilterRole(Qt::DisplayRole); // фильтруем по названию
-    proxy->setFilterKeyColumn(0);
-    proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
-    proxy->sort(0, Qt::AscendingOrder);
-
-    quizComboBox->setModel(proxy);
-    quizComboBox->setCurrentIndex(quizComboBox->findData(event["quiz_id"].toInt(), Qt::UserRole));
-
-}
-
 // ============================
 // MainWindow
 // ============================
@@ -266,8 +169,8 @@ MainWindow::MainWindow(QWidget *parent)
     vbox->setSpacing(0);
 
     // header
-    header = new HeaderWidget(this);
-    vbox->addWidget(header);
+    // header = new HeaderWidget(this);
+    // vbox->addWidget(header);
 
     // splitter
     QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
@@ -288,14 +191,24 @@ MainWindow::MainWindow(QWidget *parent)
     connect(sidebar, &SidebarWidget::activeIndexChanged,
            centerWidget, &QTabWidget::setCurrentIndex);
 
-    preview = new PreViewWidget();
-
-    splitter->addWidget(preview);
-
-    centerWidget->addTab(createEventWidget(), "");
-    centerWidget->addTab(createQuizWidget(), "");
 
 
+    //splitter->addWidget(preview);
+
+    QSplitter* eventSplitter = new QSplitter(Qt::Horizontal);
+    preview = new PreViewWidget(eventSplitter);
+    eventSplitter->setHandleWidth(3);
+    eventSplitter->addWidget(createEventWidget());
+    eventSplitter->addWidget(preview);
+
+    QSplitter* quizSplitter = new QSplitter(Qt::Horizontal);
+    quizPreview = new QuizPreViewWidget(quizSplitter);
+    quizSplitter->setHandleWidth(3);
+    quizSplitter->addWidget(createQuizWidget());
+    quizSplitter->addWidget(quizPreview);
+
+    centerWidget->addTab(eventSplitter, "");
+    centerWidget->addTab(quizSplitter, "");
 
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 1);
@@ -319,7 +232,7 @@ QWidget* MainWindow::createEventWidget()
     QWidget *w = new QWidget(this);
     w->setObjectName("eventWidget");
     auto *vbox = new QVBoxLayout(w);
-    vbox->setContentsMargins(10, 10, 10, 10);
+    vbox->setContentsMargins(30, 30, 30, 30);
     vbox->setSpacing(5);
 
     QLabel* title = new QLabel("Мероприятия", w);
@@ -351,10 +264,10 @@ QWidget* MainWindow::createEventWidget()
 
     vbox->addWidget(cont);
 
-    QSqlTableModel *model = new QSqlTableModel();
-    model->setTable("event");  // имя вашей таблицы
-    model->setEditStrategy(QSqlTableModel::OnManualSubmit); // стратегия редактирования
-    model->select(); // загружает данные из базы
+    // QSqlTableModel *model = new QSqlTableModel();
+    // model->setTable("event");  // имя вашей таблицы
+    // model->setEditStrategy(QSqlTableModel::OnManualSubmit); // стратегия редактирования
+    // model->select(); // загружает данные из базы
 
 
     // Table
@@ -372,7 +285,6 @@ QWidget* MainWindow::createEventWidget()
     tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     tableView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
     tableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Interactive);
-    tableView->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Interactive);
     tableView->setSortingEnabled(true);
     tableView->horizontalHeader()->setSortIndicatorShown(true);
 
@@ -403,9 +315,64 @@ QWidget* MainWindow::createEventWidget()
 QWidget* MainWindow::createQuizWidget()
 {
     QWidget *w = new QWidget(this);
+    w->setObjectName("eventWidget");
     auto *vbox = new QVBoxLayout(w);
-    vbox->setContentsMargins(12, 12, 12, 12);
-    vbox->setSpacing(8);
+    vbox->setContentsMargins(30, 30, 30, 30);
+    vbox->setSpacing(5);
+
+    QLabel* title = new QLabel("Квизы", w);
+    title->setProperty("cssClass", "title");
+    vbox->addWidget(title);
+
+    QWidget* cont = new QWidget(this);
+    cont->setProperty("cssClass", "whitebox");
+    QHBoxLayout* contlay = new QHBoxLayout(cont);
+    contlay->setContentsMargins(0, 0, 0, 0);
+
+    QLineEdit* searchEdit = new QLineEdit(this);
+    searchEdit->setPlaceholderText("Поиск...");
+
+    addQuizButton = new QPushButton("Создать квиз");
+    addQuizButton->setProperty("cssClass", "createButton");
+
+    connect(addQuizButton, &QPushButton::clicked, this, &MainWindow::onAddQuizButtonClicked);
+
+    contlay->addStretch();
+    contlay->addWidget(searchEdit);
+    contlay->addWidget(addQuizButton);
+
+    vbox->addWidget(cont);
+
+    // Table
+    quizView = new QTableView(this);
+    quizView->setProperty("cssClass", "dataTable");
+    quizModel = new QuizModel(this);
+    quizModel->loadSampleData();
+    quizView->setModel(quizModel);
+    quizView->horizontalHeader()->setStretchLastSection(true);
+    quizView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    quizView->setSelectionMode(QAbstractItemView::SingleSelection);
+    quizView->setAlternatingRowColors(true);
+    quizView->verticalHeader()->hide();
+    quizView->setSortingEnabled(true);
+    quizView->horizontalHeader()->setSortIndicatorShown(true);
+
+    quizProxyModel = new QSortFilterProxyModel(this);
+    quizProxyModel->setSourceModel(quizModel);
+    quizProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    quizProxyModel->setFilterKeyColumn(1); // предполагаем, что колонка 0 — "название"
+    // Привязка proxy к таблице
+    quizView->setModel(quizProxyModel);
+    // Подключаем сигнал поиска
+    connect(searchEdit, &QLineEdit::textChanged,
+            quizProxyModel, &QSortFilterProxyModel::setFilterFixedString);
+
+
+    connect(quizView, &QTableView::clicked, this, [&](){
+        quizPreview->onTableRowClicked(quizProxyModel->index(quizView->currentIndex().row(), 0).data().toInt());
+    });
+
+    vbox->addWidget(quizView);
 
     return w;
 }
@@ -432,16 +399,29 @@ void MainWindow::onAddEventButtonClicked()
     connect(dlg, &CreateEventDialog::eventCreated,
             this, [&](const Event &ev, int quizId)
     {
-        // Добавляем событие в EventsModel
         eventsModel->addEvent(ev, quizId);
 
         eventsModel->loadSampleData();
-
-        // Обновляем таблицу
-        //tableView->reset();
-
-
     });
+
+    // 4. Показываем диалог
+    dlg->exec();
+    dlg->deleteLater();
+
+}
+
+void MainWindow::onAddQuizButtonClicked()
+{
+    // 2. Создаём диалог
+    CreateQuizDialog *dlg = new CreateQuizDialog(this);
+
+    // 3. Обрабатываем сигнал eventCreated
+    connect(dlg, &CreateQuizDialog::eventCreated,
+            this, [&](const Quiz &ev)
+            {
+                quizModel->addQuiz(ev);
+                quizModel->loadSampleData();
+            });
 
     // 4. Показываем диалог
     dlg->exec();

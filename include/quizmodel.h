@@ -1,22 +1,21 @@
-#ifndef EVENTSMODEL_H
-#define EVENTSMODEL_H
+#ifndef QUIZMODEL_H
+#define QUIZMODEL_H
 
 #include <QAbstractTableModel>
 #include <QVector>
 #include <QDate>
 
-struct Event {
+struct Quiz {
     int id;
-    QString title;
-    QDateTime date;
-    int type;
+    QString topic;
+    int timer;
 };
 
-class EventsModel : public QAbstractTableModel
+class QuizModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit EventsModel(QObject *parent = nullptr);
+    explicit QuizModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -26,10 +25,10 @@ public:
 
     void loadSampleData();
 
-    bool addEvent(const Event& ev, int quizId);
+    bool addQuiz(const Quiz& ev);
 
 private:
-    QVector<Event> m_events;
+    QVector<Quiz> m_events;
 };
 
 #endif // EVENTSMODEL_H

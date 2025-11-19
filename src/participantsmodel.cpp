@@ -32,9 +32,8 @@ QVariant ParticipantsModel::data(const QModelIndex &index, int role) const
 
 void ParticipantsModel::addParticipant(const Person &p)
 {
-    // prevent duplicates by exact match (firstname+lastname+middle)
     for (const Person &existing : m_parts) {
-        if (existing.firstName == p.firstName && existing.lastName == p.lastName && existing.middleName == p.middleName)
+        if (existing.surName == p.surName && existing.name == p.name && existing.fatherName == p.fatherName)
         return;
     }
     beginInsertRows(QModelIndex(), m_parts.count(), m_parts.count());
@@ -71,8 +70,8 @@ PersonDialog::PersonDialog(QWidget* parent)
 
 
     QFormLayout* form = new QFormLayout;
-    form->addRow("Имя:", firstEdit);
-    form->addRow("Фамилия:", lastEdit);
+    form->addRow("Фамилия:", firstEdit);
+    form->addRow("Имя:", lastEdit);
     form->addRow("Отчество:", middleEdit);
 
 
@@ -93,18 +92,18 @@ PersonDialog::PersonDialog(QWidget* parent)
 
 void PersonDialog::setPerson(const Person &p)
 {
-    firstEdit->setText(p.firstName);
-    lastEdit->setText(p.lastName);
-    middleEdit->setText(p.middleName);
+    firstEdit->setText(p.surName);
+    lastEdit->setText(p.name);
+    middleEdit->setText(p.fatherName);
 }
 
 
 Person PersonDialog::person() const
 {
     Person p;
-    p.firstName = firstEdit->text().trimmed();
-    p.lastName = lastEdit->text().trimmed();
-    p.middleName = middleEdit->text().trimmed();
+    p.surName = firstEdit->text().trimmed();
+    p.name = lastEdit->text().trimmed();
+    p.fatherName = middleEdit->text().trimmed();
     return p;
 }
 
@@ -137,7 +136,7 @@ ParticipantSelectorWidget::ParticipantSelectorWidget(QWidget* parent)
     m_peopleView->setSelectionMode(QAbstractItemView::SingleSelection);
 
 
-    QStandardItemModel* m_peopleModel = new QStandardItemModel();
+    m_peopleModel = new QStandardItemModel();
     QVector<QVariantMap> users = bd.listUsers();
     for (const auto& user : users) {
         QStandardItem *item = new QStandardItem(user["surname"].toString() + " "
@@ -167,14 +166,19 @@ ParticipantSelectorWidget::ParticipantSelectorWidget(QWidget* parent)
 
     // Layout
     QVBoxLayout* left = new QVBoxLayout;
-    left->addWidget(new QLabel("Доступные люди:"));
+    QLabel* leftLabel = new QLabel("Существующие");
+    left->addWidget(leftLabel);
+    leftLabel->setProperty("cssClass", "subtitle");
     left->addWidget(m_search);
     left->addWidget(m_peopleView);
     left->addWidget(m_addNewBtn);
 
 
     QVBoxLayout* right = new QVBoxLayout;
-    right->addWidget(new QLabel("Участники мероприятия:"));
+    QLabel* rightLabel = new QLabel("Участники мероприятия");
+    right->addWidget(rightLabel);
+    rightLabel->setProperty("cssClass", "subtitle");
+    right->setProperty("cssClass", "subtitle");
     right->addWidget(m_participantsView);
 
 
@@ -199,6 +203,25 @@ QList<Person> ParticipantSelectorWidget::selectedParticipants() const
     return m_participantsModel->participants();
 }
 
+void ParticipantSelectorWidget::update(int eventId)
+{
+    this->eventId = eventId;
+
+    DatabaseManager& bd = DatabaseManager::instance();
+
+    QVector<QVariantMap> parts = bd.listParticipantsByEvent(eventId);
+
+    m_participantsModel = new ParticipantsModel();
+
+    m_participantsView->reset();
+
+    for (const auto& part : parts) {
+        QVariantMap user = bd.getUser(part["user_id"].toInt());
+        Person p{user["surname"].toString(), user["name"].toString(), user["father_name"].toString()};
+        m_participantsModel->addParticipant(p);
+    }
+}
+
 
 void ParticipantSelectorWidget::onAddNew()
 {
@@ -207,13 +230,18 @@ void ParticipantSelectorWidget::onAddNew()
     PersonDialog dlg(this);
     if (dlg.exec() == QDialog::Accepted) {
         Person p = dlg.person();
-        // add to people model
-        //m_peopleModel->addPerson(p);
+
         qint64 id;
-        bd.addUser(p.middleName, p.firstName, p.lastName, id);
+        bd.addUser(p.surName, p.name, p.fatherName, id);
+
+        // add to people model
+        QStandardItem *item = new QStandardItem(p.displayName());
+        item->setData(id, Qt::UserRole);        // userData сюда
+        m_peopleModel->appendRow(item);
+
+
         // and add to participants
         m_participantsModel->addParticipant(p);
-
 
         // optional: for usability, clear search and select newly added person
         m_search->clear();
@@ -233,6 +261,12 @@ void ParticipantSelectorWidget::onPeopleActivated(const QModelIndex &index)
     Person p{user["surname"].toString(), user["name"].toString(), user["father_name"].toString()};
 
     m_participantsModel->addParticipant(p);
+
+    int count = bd.listParticipantsByEvent(eventId).size();
+
+    qint64 id;
+    qDebug() << eventId << src.data(Qt::UserRole).toInt() << count;
+    bd.addParticipant(eventId, src.data(Qt::UserRole).toInt(), 0, count, id);
 }
 
 

@@ -1,7 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "previewwidget.h"
+#include "quizpreviewwidget.h"
 #include "eventsmodel.h"
+#include "quizmodel.h"
 
 
 #include <QLabel>
@@ -51,26 +54,6 @@ private:
     int m_activeIndex = -1;
 };
 
-class PreViewWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit PreViewWidget(QWidget *parent = nullptr);
-
-    QLabel* title;
-    QLabel* type;
-    QLabel* date;
-    QLabel* time;
-
-    QPushButton* editButton;
-    QPushButton* deleteButton;
-
-    QComboBox* quizComboBox;
-    ParticipantSelectorWidget *participantSelectorWidget;
-
-    void onTableRowClicked(int index);
-};
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -83,23 +66,30 @@ private:
     HeaderWidget *header;
     SidebarWidget *sidebar;
     PreViewWidget* preview;
+    QuizPreViewWidget* quizPreview;
+
 
     QPushButton *btnOpen;
     QPushButton *btnEdit;
     QPushButton *btnExport;
 
     QTableView *tableView;
+    QTableView *quizView;
     EventsModel *eventsModel;
+    QuizModel *quizModel;
 
     QWidget* createEventWidget();
     QWidget* createQuizWidget();
 
     QSortFilterProxyModel *proxyModel;
+    QSortFilterProxyModel *quizProxyModel;
 
     QPushButton* addEventButton;
+    QPushButton* addQuizButton;
 
 private slots:
     void onAddEventButtonClicked();
+    void onAddQuizButtonClicked();
 };
 
 #endif // MAINWINDOW_H
