@@ -42,10 +42,10 @@ public:
     bool removeTeamUser(qint64 userId, qint64 teamId);
 
     // --- CRUD: quiz ---
-    bool addQuiz(bool type, const QString &topic, qint64 timer, qint64 &outId);
+    bool addQuiz(const QString &topic, qint64 timer, qint64 &outId);
     QVariantMap getQuiz(qint64 quizId);
     QVector<QVariantMap> listQuizzes();
-    bool updateQuiz(qint64 quizId, bool type, const QString &topic, qint64 timer);
+    bool updateQuiz(qint64 quizId, const QString &topic, qint64 timer);
     bool removeQuiz(qint64 quizId);
 
     // --- CRUD: question ---
@@ -78,10 +78,10 @@ public:
     bool removeResult(qint64 resultId);
 
     // --- CRUD: event ---
-    bool addEvent(qint64 quizId, const QString& title, const QDateTime &time, qint64 &outId);
+    bool addEvent(qint64 quizId, const QString& title, const QDateTime &time, int type, qint64 &outId);
     QVariantMap getEvent(qint64 eventId);
     QVariantMap getEvent(const QDateTime &time);
-    bool updateEvent(qint64 eventId, qint64 quizId, const QString& title, const QDateTime &time);
+    bool updateEvent(qint64 eventId, qint64 quizId, const QString& title, const QDateTime &time, int type);
     bool removeEvent(qint64 eventId);
 
     // utility

@@ -33,7 +33,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         switch (index.column()) {
         case 0: return ev.id;
         case 1: return ev.title;
-        case 2: return ev.date.toString("dd.MM.yyyy");
+        case 2: return ev.date.toString("dd.MM.yyyy HH:mm");
         case 3:
             switch (ev.type) {
             case 0: return "индивидуальный";
@@ -53,7 +53,7 @@ QVariant EventsModel::headerData(int section, Qt::Orientation orientation, int r
         switch (section) {
         case 0: return "#";
         case 1: return "Название";
-        case 2: return "Дата";
+        case 2: return "Время";
         case 3: return "Тип";
         case 4: return QStringLiteral("Количество\nучастников");;
         }
@@ -78,7 +78,7 @@ void EventsModel::loadSampleData()
     QSqlDatabase db = bd.database(); // метод, возвращающий QSqlDatabase
 
     QSqlQuery query(db);
-    if (!query.exec("SELECT event_id, title, time, quiz_id FROM event")) {
+    if (!query.exec("SELECT event_id, title, time, quiz_id, type FROM event")) {
         qWarning() << "Failed to load events:" << query.lastError().text();
         endResetModel();
         return;
@@ -89,12 +89,21 @@ void EventsModel::loadSampleData()
         Event ev;
         ev.id = query.value("event_id").toInt();
         ev.title = query.value("title").toString();
-        ev.date = QDate::fromString(query.value("time").toString(), "yyyy-MM-dd"); // предполагаем, что в БД хранится в формате "YYYY-MM-DD"
-        ev.type = query.value("quiz_id").toInt(); // если тип зависит от quiz_id
+        //ev.date = QDateTime::fromString(query.value("time").toString(), "yyyy-MM-dd");
+        ev.date = QDateTime::fromSecsSinceEpoch(query.value("time").toLongLong());
+        ev.type = query.value("type").toInt(); // если тип зависит от quiz_id
         ev.participantNum = 0; // если нет колонки участников, можно оставить 0 или загрузить отдельно
 
         m_events.append(ev);
     }
 
     endResetModel();
+}
+
+bool EventsModel::addEvent(const Event& ev, int quizId)
+{
+    DatabaseManager& bd = DatabaseManager::instance();
+    qint64 id;
+    bd.addEvent(quizId, ev.title, ev.date, ev.type, id);
+    return true;
 }

@@ -8,7 +8,7 @@
 struct Event {
     int id;
     QString title;
-    QDate date;
+    QDateTime date;
     int type;     // 0-training, 1-quiz, 2-testing
     int participantNum;
 };
@@ -26,6 +26,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     void loadSampleData();
+
+    bool addEvent(const Event& ev, int quizId);
 
 private:
     QVector<Event> m_events;

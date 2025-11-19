@@ -14,6 +14,9 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QSortFilterProxyModel>
+#include <QComboBox>
+
+class ParticipantSelectorWidget;
 
 class HeaderWidget : public QWidget
 {
@@ -56,13 +59,16 @@ public:
 
     QLabel* title;
     QLabel* type;
-    QLabel* data;
+    QLabel* date;
+    QLabel* time;
 
     QPushButton* editButton;
     QPushButton* deleteButton;
 
-public slots:
-    void onTableRowClicked(const QModelIndex &index);
+    QComboBox* quizComboBox;
+    ParticipantSelectorWidget *participantSelectorWidget;
+
+    void onTableRowClicked(int index);
 };
 
 class MainWindow : public QMainWindow
@@ -71,11 +77,6 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-
-private slots:
-    void onOpenClicked();
-    void onEditClicked();
-    void onExportClicked();
 
 private:
     QWidget *central;
