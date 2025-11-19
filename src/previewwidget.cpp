@@ -23,9 +23,11 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
     title->setProperty("cssClass", "title");
     title->setAlignment(Qt::AlignLeft);
     title->setWordWrap(true);
-    title->setFixedWidth(200);   // твоя фиксированная ширина
+    title->setFixedWidth(200);
     type = new QLabel("Индивидуальный квиз", this);
     type->setProperty("cssClass", "subtitle");
+    type->setWordWrap(true);
+    type->setFixedWidth(150);
     type->setAlignment(Qt::AlignCenter);
     generateButton = new QPushButton("Сформировать демонстрацию");
     generateButton->setProperty("cssClass", "createButton");
