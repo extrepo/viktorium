@@ -253,7 +253,7 @@ QWidget* MainWindow::createEventWidget()
     QLineEdit* searchEdit = new QLineEdit(this);
     searchEdit->setPlaceholderText("Поиск...");
 
-    addEventButton = new QPushButton("Создать событие");
+    addEventButton = new QPushButton("Создать мероприятие");
     addEventButton->setProperty("cssClass", "createButton");
 
     connect(addEventButton, &QPushButton::clicked, this, &MainWindow::onAddEventButtonClicked);

@@ -17,7 +17,6 @@ private slots:
     void onCreateGroup();
     void onEditGroup();
     void onDeleteGroup();
-    void onRefresh();
 
 private:
     QStandardItemModel* m_peopleModel;

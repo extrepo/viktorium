@@ -102,8 +102,3 @@ void GroupManagerWidget::onDeleteGroup() {
         QMessageBox::warning(this, "Ошибка", "Не удалось удалить группу (БД).");
     }
 }
-
-void GroupManagerWidget::onRefresh() {
-    //m_peopleModel->refreshFromDatabase();
-    m_groupsModel->refreshFromDatabase();
-}
