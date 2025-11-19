@@ -19,7 +19,7 @@ void LM::requestQuestion(const QString &topic)
     QJsonObject message;
     message["role"] = "user";
     message["content"] =
-        QString("Сгенерируй один учебный вопрос по теме '%1' и 3-4 ответа. Оцени сложность от 1 до 5."
+        QString("Сгенерируй один учебный вопрос по теме '%1' и 3-4 ответа. Оцени сложность от 1 до 3."
                 "Формат ответа строго JSON: "
                 "{ \"question\": \"...\", \"answers\": [\"...\"], \"correct_index\": N, \"difficulty\": N }")
         .arg(topic);
