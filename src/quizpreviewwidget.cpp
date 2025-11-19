@@ -29,6 +29,8 @@ QuizPreViewWidget::QuizPreViewWidget(QWidget *parent): QWidget(parent)
     layout->addWidget(title, 0, Qt::AlignLeft);
     layout->addWidget(timerLabel);
     layout->addWidget(timer);
+    questionsWidget = new QuestionsWidget(this);
+    layout->addWidget(questionsWidget);
     layout->addWidget(participantsLabel);
     layout->addStretch();
 }
@@ -43,5 +45,7 @@ void QuizPreViewWidget::onTableRowClicked(int index)
 
     title->setText(event["topic"].toString());
     timer->setValue(event["timer"].toInt());
+
+    questionsWidget->showQuizData(event["topic"].toString(), index);
 
 }

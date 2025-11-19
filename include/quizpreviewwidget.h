@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QSpinBox>
+#include "questionswidget.h"
 
 class QuizPreViewWidget : public QWidget
 {
@@ -22,6 +23,8 @@ public:
 
     QPushButton* editButton;
     QPushButton* deleteButton;
+
+    QuestionsWidget* questionsWidget;
 
     void onTableRowClicked(int index);
 };

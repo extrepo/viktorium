@@ -29,12 +29,12 @@ int main(int argc, char *argv[])
         return 1;
     }
     qint64 quizId;
-    if(!db->addQuiz(false, "Test topic", 5, quizId)) {
+    if(!db->addQuiz("Test topic", 5, quizId)) {
         qWarning() << "Ошибка добавления квиза";
         return 1;
     }
     qint64 eventId;
-    if(!db->addEvent(quizId, "Event 1", QDateTime::currentDateTime(), eventId)) {
+    if(!db->addEvent(quizId, "Event 1", QDateTime::currentDateTime(), false, eventId)) {
         qWarning() << "Ошибка добавления события";
         return 1;
     }

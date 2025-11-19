@@ -340,13 +340,8 @@ bool DatabaseManager::addQuiz(const QString &topic, qint64 timer, qint64 &outId)
 {
     if (!m_db.isOpen() && !open()) return false;
     QSqlQuery q(m_db);
-<<<<<<< HEAD
-    q.prepare("INSERT INTO quiz (type, topic, timer) VALUES (?, ?, ?);");
-    if (!execPrepared(q, { type ? 1 : 0, topic, timer })) return false;
-=======
     q.prepare("INSERT INTO quiz (topic, timer) VALUES (?, ?);");
     if (!execPrepared(q, {topic, timer })) return false;
->>>>>>> origin/gui
     outId = q.lastInsertId().toLongLong();
     return true;
 }
