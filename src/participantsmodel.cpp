@@ -52,6 +52,13 @@ void ParticipantsModel::removeParticipantAt(int row)
     emit participantsChanged();
 }
 
+void ParticipantsModel::reset()
+{
+    beginResetModel();
+    m_parts.clear();   // ваш контейнер данных
+    endResetModel();
+}
+
 PersonDialog::PersonDialog(QWidget* parent)
 : QDialog(parent)
 {
@@ -211,15 +218,16 @@ void ParticipantSelectorWidget::update(int eventId)
 
     QVector<QVariantMap> parts = bd.listParticipantsByEvent(eventId);
 
-    m_participantsModel = new ParticipantsModel();
+    m_participantsModel->reset();
 
-    m_participantsView->reset();
 
     for (const auto& part : parts) {
         QVariantMap user = bd.getUser(part["user_id"].toInt());
-        Person p{user["surname"].toString(), user["name"].toString(), user["father_name"].toString()};
+        Person p{user["user_id"].toInt(), user["surname"].toString(), user["name"].toString(), user["father_name"].toString()};
         m_participantsModel->addParticipant(p);
     }
+
+    m_participantsView->reset();
 }
 
 
@@ -258,22 +266,42 @@ void ParticipantSelectorWidget::onPeopleActivated(const QModelIndex &index)
     QVariantMap user = bd.getUser(src.data(Qt::UserRole).toInt());
     //Person p = m_peopleModel->personAt(src.row());
 
-    Person p{user["surname"].toString(), user["name"].toString(), user["father_name"].toString()};
+    Person p{user["user_id"].toInt(), user["surname"].toString(), user["name"].toString(), user["father_name"].toString()};
 
     m_participantsModel->addParticipant(p);
 
-    int count = bd.listParticipantsByEvent(eventId).size();
+    QVector<QVariantMap> parts = bd.listParticipantsByEvent(eventId);
+    int count = parts.count();
+    for (const auto& part : parts) {
+        if (part["user_id"].toInt() == src.data(Qt::UserRole).toInt()) return;
+    }
+
 
     qint64 id;
-    qDebug() << eventId << src.data(Qt::UserRole).toInt() << count;
     bd.addParticipant(eventId, src.data(Qt::UserRole).toInt(), 0, count, id);
 }
 
 
 void ParticipantSelectorWidget::onParticipantActivated(const QModelIndex &index)
 {
+    DatabaseManager& bd = DatabaseManager::instance();
+
     if (!index.isValid()) return;
-    // remove on activation (double click)
+
+    QStringList parts = index.data(Qt::DisplayRole).toString().split(" ", Qt::SkipEmptyParts);
+
+    // Проверяем количество частей
+    QString surname;
+    QString name;
+    QString fathname;
+
+    if (parts.size() >= 1) surname  = parts[0];
+    if (parts.size() >= 2) name = parts[1];
+    if (parts.size() >= 3) fathname = parts[2];
+
+    int id = bd.getUser(surname, name, fathname);
+
+    bd.removeParticipant(id, eventId);
     m_participantsModel->removeParticipantAt(index.row());
 }
 

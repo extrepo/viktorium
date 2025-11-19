@@ -1,6 +1,7 @@
 #include "previewwidget.h"
 #include "participantsmodel.h"
-#include "databasemanager.h""
+#include "groupmanager.h"
+#include "databasemanager.h"
 
 #include <QVBoxLayout>
 
@@ -23,6 +24,8 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
     type = new QLabel("Индивидуальный", this);
     type->setProperty("cssClass", "subtitle");
     type->setAlignment(Qt::AlignCenter);
+    generateButton = new QPushButton("Начать демонстрацию");
+    generateButton->setProperty("cssClass", "createButton");
 
     date = new QLabel();
     date->setProperty("cssClass", "date");
@@ -32,6 +35,8 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
     titleLayout->addWidget(title, 0, Qt::AlignRight | Qt::AlignVCenter);
     titleLayout->addWidget(type, 0, Qt::AlignRight | Qt::AlignVCenter);
     titleLayout->addStretch();
+    titleLayout->addWidget(generateButton);
+
 
     QLabel* quizLabel = new QLabel("Квиз");
     quizLabel->setProperty("cssClass", "title2");
@@ -42,14 +47,7 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
     participantsLabel->setProperty("cssClass", "title2");
 
     participantSelectorWidget = new ParticipantSelectorWidget(this);
-
-    // Добавить участников из базы
-    //    participantsWidget->addExistingParticipant({"Иван", "Иванов", "Иванович"});
-    //    participantsWidget->addExistingParticipant({"Петр", "Петров", ""});
-
-
-    QLabel* settingsLabel = new QLabel("Настройки");
-    settingsLabel->setProperty("cssClass", "title2");
+    groupmanagetWidget = new GroupManagerWidget(this);
 
     layout->addWidget(titleContainer);
     layout->addWidget(date);
@@ -58,7 +56,7 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
     layout->addWidget(quizComboBox);
     layout->addWidget(participantsLabel);
     layout->addWidget(participantSelectorWidget);
-    layout->addWidget(settingsLabel);
+    layout->addWidget(groupmanagetWidget);
     layout->addStretch();
 }
 
@@ -73,7 +71,15 @@ void PreViewWidget::onTableRowClicked(int index)
     QLocale ru(QLocale::Russian);
 
     title->setText(event["title"].toString());
-    type->setText(event["type"].toInt() == 0 ? "Индивидуальный" : "Командный");
+    if (event["type"].toInt() == 0) {
+        type->setText("Индивидуальный");
+        participantSelectorWidget->show();
+        groupmanagetWidget->hide();
+    } else {
+        type->setText("Командный");
+        participantSelectorWidget->hide();
+        groupmanagetWidget->show();
+    }
     QDateTime dateTime = QDateTime::fromSecsSinceEpoch(event["time"].toLongLong());
     date->setText(ru.toString(dateTime.date(), "d MMMM yyyy"));
     time->setText(dateTime.time().toString("HH:mm"));

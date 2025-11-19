@@ -68,7 +68,6 @@ void SidebarWidget::initUi()
     QVector<Item> items = {
         { QStringLiteral("Мероприятия"),   QStringLiteral("assets/ic_events.svg") },
         { QStringLiteral("Квизы"),         QStringLiteral("assets/ic_quiz.svg") },
-        { QStringLiteral("Участники"),     QStringLiteral("assets/ic_participants.svg") },
         { QStringLiteral("Настройки"),     QStringLiteral("assets/ic_settings.svg") }
     };
 
@@ -200,19 +199,22 @@ MainWindow::MainWindow(QWidget *parent)
     eventSplitter->setHandleWidth(3);
     eventSplitter->addWidget(createEventWidget());
     eventSplitter->addWidget(preview);
+    eventSplitter->setStretchFactor(0, 1);
+    eventSplitter->setStretchFactor(1, 1);
 
     QSplitter* quizSplitter = new QSplitter(Qt::Horizontal);
     quizPreview = new QuizPreViewWidget(quizSplitter);
     quizSplitter->setHandleWidth(3);
     quizSplitter->addWidget(createQuizWidget());
     quizSplitter->addWidget(quizPreview);
+    quizSplitter->setStretchFactor(0, 1);
+    quizSplitter->setStretchFactor(1, 1);
 
     centerWidget->addTab(eventSplitter, "");
     centerWidget->addTab(quizSplitter, "");
 
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 1);
-    splitter->setStretchFactor(2, 1);
 
     vbox->addWidget(splitter);
 
@@ -244,11 +246,6 @@ QWidget* MainWindow::createEventWidget()
     QHBoxLayout* contlay = new QHBoxLayout(cont);
     contlay->setContentsMargins(0, 0, 0, 0);
 
-    QLabel* subtitle = new QLabel(w);
-    QString text = "6 мероприятий · ближайшее сегодня";
-    subtitle->setText(text);
-    subtitle->setProperty("cssClass", "subtitle");
-
     QLineEdit* searchEdit = new QLineEdit(this);
     searchEdit->setPlaceholderText("Поиск...");
 
@@ -257,7 +254,6 @@ QWidget* MainWindow::createEventWidget()
 
     connect(addEventButton, &QPushButton::clicked, this, &MainWindow::onAddEventButtonClicked);
 
-    contlay->addWidget(subtitle);
     contlay->addStretch();
     contlay->addWidget(searchEdit);
     contlay->addWidget(addEventButton);

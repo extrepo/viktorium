@@ -26,15 +26,10 @@ QuizPreViewWidget::QuizPreViewWidget(QWidget *parent): QWidget(parent)
     QLabel* participantsLabel = new QLabel("Участники");
     participantsLabel->setProperty("cssClass", "title2");
 
-    QLabel* settingsLabel = new QLabel("Настройки");
-    settingsLabel->setProperty("cssClass", "title2");
-
     layout->addWidget(title, 0, Qt::AlignLeft);
     layout->addWidget(timerLabel);
     layout->addWidget(timer);
     layout->addWidget(participantsLabel);
-    layout->addStretch();
-    layout->addWidget(settingsLabel);
     layout->addStretch();
 }
 

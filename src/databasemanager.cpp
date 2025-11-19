@@ -205,6 +205,18 @@ QVariantMap DatabaseManager::getUser(qint64 userId)
     return empty;
 }
 
+int DatabaseManager::getUser(const QString &surname, const QString &name, const QString &fatherName)
+{
+    QVariantMap empty;
+    if (!m_db.isOpen() && !open()) return -1;
+
+    QSqlQuery q(m_db);
+    q.prepare("SELECT * FROM \"user\" WHERE surname = ? and name = ? and father_name = ?;");
+    if (!execPrepared(q, {surname, name, fatherName})) return -1;
+    if (q.next()) return recordToMap(q.record())["user_id"].toInt();
+    return -1;
+}
+
 QVector<QVariantMap> DatabaseManager::listUsers()
 {
     QVector<QVariantMap> res;
@@ -257,6 +269,26 @@ QVector<QVariantMap> DatabaseManager::listTeams()
     QVector<QVariantMap> v;
     if (!m_db.isOpen() && !open()) return v;
     QSqlQuery q("SELECT * FROM team;", m_db);
+    while (q.next()) v.append(recordToMap(q.record()));
+    return v;
+}
+
+QVector<QVariantMap> DatabaseManager::listTeamMembers(qint64 teamId)
+{
+    QVector<QVariantMap> v;
+    if (!m_db.isOpen() && !open()) return v;
+    QSqlQuery q("SELECT * FROM participant where team_id = ?;", m_db);
+    if (!execPrepared(q, {teamId})) return v;
+    while (q.next()) v.append(recordToMap(q.record()));
+    return v;
+}
+
+QVector<QVariantMap> DatabaseManager::listTeamUsers(qint64 teamId)
+{
+    QVector<QVariantMap> v;
+    if (!m_db.isOpen() && !open()) return v;
+    QSqlQuery q("SELECT * FROM team_user where team_id = ?;", m_db);
+    if (!execPrepared(q, {teamId})) return v;
     while (q.next()) v.append(recordToMap(q.record()));
     return v;
 }
@@ -495,6 +527,14 @@ bool DatabaseManager::removeParticipant(qint64 participantId)
     QSqlQuery q(m_db);
     q.prepare("DELETE FROM participant WHERE participant_id = ?;");
     return execPrepared(q, {participantId});
+}
+
+bool DatabaseManager::removeParticipant(qint64 userId, quint64 eventId)
+{
+    if (!m_db.isOpen() && !open()) return false;
+    QSqlQuery q(m_db);
+    q.prepare("DELETE FROM participant WHERE user_id = ? and event_id = ?;");
+    return execPrepared(q, {userId, eventId});
 }
 
 // ---------- result ----------
