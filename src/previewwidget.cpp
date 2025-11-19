@@ -2,6 +2,7 @@
 #include "participantsmodel.h"
 #include "groupmanager.h"
 #include "databasemanager.h"
+#include "exporthelper.h"
 
 #include <QVBoxLayout>
 
@@ -24,8 +25,14 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
     type = new QLabel("Индивидуальный", this);
     type->setProperty("cssClass", "subtitle");
     type->setAlignment(Qt::AlignCenter);
-    generateButton = new QPushButton("Начать демонстрацию");
+    generateButton = new QPushButton("Сформировать демонстрацию");
     generateButton->setProperty("cssClass", "createButton");
+
+    connect(generateButton, &QPushButton::clicked, this, [&](){
+        DatabaseManager& bd = DatabaseManager::instance();
+        ExportHelper::exportQuiz(bd.getEvent(eventId)["quiz_id"].toInt(), this);
+    });
+
 
     date = new QLabel();
     date->setProperty("cssClass", "date");
@@ -62,6 +69,8 @@ PreViewWidget::PreViewWidget(QWidget *parent): QWidget(parent)
 
 void PreViewWidget::onTableRowClicked(int index)
 {
+    eventId = index;
+
     participantSelectorWidget->update(index);
 
     DatabaseManager& db = DatabaseManager::instance();

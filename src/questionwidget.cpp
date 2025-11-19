@@ -132,6 +132,7 @@ void QuestionWidget::onLMButton()
     difficultyComboBox->setEnabled(false);
     questionEdit->setEnabled(false);
     answersList->setEnabled(false);
+    rightAnswer->setEnabled(false);
     lm.requestQuestion(topic);
 }
 
@@ -147,6 +148,7 @@ void QuestionWidget::onLMReady(const QVector<QVariant> &result)
     difficultyComboBox->setEnabled(true);
     questionEdit->setEnabled(true);
     answersList->setEnabled(true);
+    rightAnswer->setEnabled(true);
 }
 
 void QuestionWidget::onLMError(const QString &error)

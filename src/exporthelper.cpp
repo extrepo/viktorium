@@ -32,7 +32,7 @@ bool ExportHelper::exportQuiz(quint64 id, QWidget *parent)
     QString templ = readFile(templateDir.filePath("template1.html"));
     DatabaseManager* db = &DatabaseManager::instance();
     auto quiz = db->getQuiz(id);
-    QString quizName = quiz["name"].toString();
+    QString quizName = quiz["topic"].toString();
     int quizTimer = quiz["timer"].toInt();
     int questionNumber = 1;
     QVector<QVariantMap> questions = db->listQuestionsByQuiz(id);
@@ -40,13 +40,13 @@ bool ExportHelper::exportQuiz(quint64 id, QWidget *parent)
         QString s = QString("<script>"
             "const sample = {"
             "id: \"Q-%1\","
-            "title: \"%2\","
-            "topic: \"\","
+            "title: \"\","
+            "topic: \"%2\","
             "points: %3,"
             "time_seconds: %4,"
             "text: \"%5\","
             "correct_id: \"%6\","
-            "next_href: \"%7.html\""
+            "next_href: \"%7.html\","
             "options: [").arg(questionNumber).arg(quizName).arg(q["points"].toString())
             .arg(quizTimer).arg(q["text"].toString()).arg(q["answer"].toString().arg(questionNumber+1));
             int answerNumber = 1;
@@ -55,7 +55,7 @@ bool ExportHelper::exportQuiz(quint64 id, QWidget *parent)
                 s += QString("{id: \"%1\", text: \"%2\"}").arg(answerNumber).arg(a["text"].toString());
                 answerNumber++;
             }
-        s += QString("],"
+        s += QString("]"
               "};"
             "</script>\r\n");
         writeFile(outDir.filePath(QString::number(questionNumber) + ".html"), s + templ);

@@ -21,18 +21,17 @@ QuizPreViewWidget::QuizPreViewWidget(QWidget *parent): QWidget(parent)
 
     timer = new QSpinBox();
     timer->setRange(5, 900);
-    timer->setEnabled(false);
 
-    QLabel* participantsLabel = new QLabel("Участники");
-    participantsLabel->setProperty("cssClass", "title2");
+
+    // connect(timer, &QSpinBox::valueChanged, this, [&](int value){
+
+    // });
 
     layout->addWidget(title, 0, Qt::AlignLeft);
     layout->addWidget(timerLabel);
     layout->addWidget(timer);
     questionsWidget = new QuestionsWidget(this);
     layout->addWidget(questionsWidget);
-    layout->addWidget(participantsLabel);
-    layout->addStretch();
 }
 
 void QuizPreViewWidget::onTableRowClicked(int index)

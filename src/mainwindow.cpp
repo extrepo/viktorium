@@ -68,7 +68,7 @@ void SidebarWidget::initUi()
     QVector<Item> items = {
         { QStringLiteral("Мероприятия"),   QStringLiteral("assets/ic_events.svg") },
         { QStringLiteral("Квизы"),         QStringLiteral("assets/ic_quiz.svg") },
-        { QStringLiteral("Настройки"),     QStringLiteral("assets/ic_settings.svg") }
+        { QStringLiteral("Статистика"),     QStringLiteral("assets/ic_settings.svg") }
     };
 
     const QSize iconSize(20, 20);
@@ -212,6 +212,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     centerWidget->addTab(eventSplitter, "");
     centerWidget->addTab(quizSplitter, "");
+    centerWidget->addTab(createStatisticWidget(), "");
 
     splitter->setStretchFactor(0, 0);
     splitter->setStretchFactor(1, 1);
@@ -369,6 +370,46 @@ QWidget* MainWindow::createQuizWidget()
     });
 
     vbox->addWidget(quizView);
+
+    return w;
+}
+
+QWidget* MainWindow::createStatisticWidget()
+{
+    QWidget *w = new QWidget(this);
+    w->setObjectName("eventWidget");
+    auto *vbox = new QVBoxLayout(w);
+    vbox->setContentsMargins(30, 30, 30, 30);
+    vbox->setSpacing(5);
+
+    QLabel* title = new QLabel("Статистика", w);
+    title->setProperty("cssClass", "title");
+    vbox->addWidget(title);
+
+    QPushButton* generateButton = new QPushButton("Сформировать отчёт");
+    generateButton->setProperty("cssClass", "createButton");
+
+    QWidget* cont1 = new QWidget();
+    cont1->setProperty("cssClass", "container");
+    QWidget* cont2 = new QWidget();
+    cont1->setProperty("cssClass", "container");
+
+    QComboBox* hour1 = new QComboBox;
+    QComboBox* hour2 = new QComboBox;
+    for (int i = 0; i < 24; ++i) {
+        hour1->addItem(QString("%1").arg(i, 2, 10, QLatin1Char('0')));
+        hour2->addItem(QString("%1").arg(i, 2, 10, QLatin1Char('0')));
+    }
+
+    QComboBox* minute1 = new QComboBox;
+    QComboBox* minute2 = new QComboBox;
+    for (int i = 0; i < 60; i += 5) {
+        minute1->addItem(QString("%1").arg(i, 2, 10, QLatin1Char('0')));
+        minute2->addItem(QString("%1").arg(i, 2, 10, QLatin1Char('0')));
+    }
+
+
+
 
     return w;
 }

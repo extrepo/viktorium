@@ -27,6 +27,8 @@ public:
     GroupManagerWidget* groupmanagetWidget;
 
     void onTableRowClicked(int index);
+
+    int eventId = -1;
 };
 
 #endif

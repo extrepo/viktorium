@@ -80,6 +80,7 @@ private:
 
     QWidget* createEventWidget();
     QWidget* createQuizWidget();
+    QWidget* createStatisticWidget();
 
     QSortFilterProxyModel *proxyModel;
     QSortFilterProxyModel *quizProxyModel;
