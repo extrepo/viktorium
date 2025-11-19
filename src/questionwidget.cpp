@@ -87,7 +87,7 @@ QuestionWidget::QuestionWidget(QString topic, qint64 quizId, qint64 questionId, 
 
 void QuestionWidget::onSaveButton()
 {
-    if (questionEdit->text().size() < 5 || answersList->count() == 0) {
+    if (questionEdit->text().size() < 5 || answersList->count() < 3) {
         QMessageBox::warning(nullptr, "Ошибка", "Заполните все поля.");
         return;
     }

@@ -85,6 +85,7 @@ public:
     bool addEvent(qint64 quizId, const QString& title, const QDateTime &time, int type, qint64 &outId);
     QVariantMap getEvent(qint64 eventId);
     QVariantMap getEvent(const QDateTime &time);
+    QVector<QVariantMap> listEvents();
     bool updateEvent(qint64 eventId, qint64 quizId, const QString& title, const QDateTime &time, int type);
     bool removeEvent(qint64 eventId);
 

@@ -631,6 +631,15 @@ QVariantMap DatabaseManager::getEvent(const QDateTime &time)
     return empty;
 }
 
+QVector<QVariantMap> DatabaseManager::listEvents()
+{
+    QVector<QVariantMap> v;
+    if (!m_db.isOpen() && !open()) return v;
+    QSqlQuery q("SELECT * FROM event;", m_db);
+    while (q.next()) v.append(recordToMap(q.record()));
+    return v;
+}
+
 bool DatabaseManager::updateEvent(qint64 eventId, qint64 quizId, const QString& title, const QDateTime &time, int type)
 {
     if (!m_db.isOpen() && !open()) return false;

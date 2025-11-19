@@ -2,6 +2,7 @@
 #include "databasemanager.h"
 #include "createeventdialog.h"
 #include "createquizdialog.h"
+#include "reporthelper.h"
 
 
 #include <QHeaderView>
@@ -386,13 +387,38 @@ QWidget* MainWindow::createStatisticWidget()
     title->setProperty("cssClass", "title");
     vbox->addWidget(title);
 
-    QPushButton* generateButton = new QPushButton("Сформировать отчёт");
-    generateButton->setProperty("cssClass", "createButton");
+    QPushButton* generateTeamReportButton = new QPushButton("Сформировать отчёт по командам");
+    generateTeamReportButton->setProperty("cssClass", "createButton");
+    QPushButton* generateUserReportButton = new QPushButton("Сформировать отчёт по участникам");
+    generateUserReportButton->setProperty("cssClass", "createButton");
+    QPushButton* generateEventReportButton = new QPushButton("Сформировать отчёт по мероприятию");
+    generateEventReportButton->setProperty("cssClass", "createButton");
+
+    generateTeamReportButton->setFixedWidth(300);
+    generateUserReportButton->setFixedWidth(300);
+    generateEventReportButton->setFixedWidth(300);
 
     QWidget* cont1 = new QWidget();
     cont1->setProperty("cssClass", "container");
+    QHBoxLayout* lay1 = new QHBoxLayout(cont1);
+    lay1->setContentsMargins(0, 0, 0, 0);
+    lay1->setSpacing(0);
     QWidget* cont2 = new QWidget();
-    cont1->setProperty("cssClass", "container");
+    cont2->setProperty("cssClass", "container");
+    QHBoxLayout* lay2 = new QHBoxLayout(cont2);
+    lay2->setContentsMargins(0, 0, 0, 0);
+    lay2->setSpacing(0);
+
+    cont1->setFixedWidth(250);
+    cont2->setFixedWidth(250);
+
+    QDateEdit* dateEdit1 = new QDateEdit(QDate::currentDate());
+    dateEdit1->setCalendarPopup(true);
+    dateEdit1->setDisplayFormat("dd.MM.yyyy");
+
+    QDateEdit* dateEdit2 = new QDateEdit(QDate::currentDate());
+    dateEdit2->setCalendarPopup(true);
+    dateEdit2->setDisplayFormat("dd.MM.yyyy");
 
     QComboBox* hour1 = new QComboBox;
     QComboBox* hour2 = new QComboBox;
@@ -408,8 +434,69 @@ QWidget* MainWindow::createStatisticWidget()
         minute2->addItem(QString("%1").arg(i, 2, 10, QLatin1Char('0')));
     }
 
+    QLabel* s = new QLabel("с");
+    s->setProperty("cssClass", "subtitle");
+    QLabel* po = new QLabel("по");
+    po->setProperty("cssClass", "subtitle");
 
+    lay1->addWidget(s);
+    lay1->addStretch();
+    lay1->addWidget(dateEdit1);
+    lay1->addWidget(hour1);
+    lay1->addWidget(minute1);
 
+    lay2->addWidget(po);
+    lay2->addStretch();
+    lay2->addWidget(dateEdit2);
+    lay2->addWidget(hour2);
+    lay2->addWidget(minute2);
+
+    QComboBox* eventCombo = new QComboBox(this);
+    eventCombo->setEditable(true);
+
+    DatabaseManager& bd = DatabaseManager::instance();
+
+    auto events = bd.listEvents();
+
+    QStandardItemModel *model = new QStandardItemModel(this);
+    for (const auto &q : events) {
+        QStandardItem *item = new QStandardItem(q["title"].toString());
+        item->setData(q["event_id"].toInt(), Qt::UserRole);        // userData сюда
+        model->appendRow(item);
+    }
+
+    QSortFilterProxyModel *proxy = new QSortFilterProxyModel(this);
+    proxy->setSourceModel(model);
+    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    proxy->setFilterRole(Qt::DisplayRole); // фильтруем по названию
+    proxy->setFilterKeyColumn(0);
+    proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
+    proxy->sort(0, Qt::AscendingOrder);
+
+    eventCombo->setModel(proxy);
+
+    vbox->addWidget(cont1, 0, Qt::AlignLeft);
+    vbox->addWidget(cont2, 0, Qt::AlignLeft);
+    vbox->addWidget(eventCombo, 0, Qt::AlignLeft);
+    vbox->addWidget(generateTeamReportButton, 0, Qt::AlignLeft);
+    vbox->addWidget(generateUserReportButton, 0, Qt::AlignLeft);
+    vbox->addWidget(generateEventReportButton, 0, Qt::AlignLeft);
+
+    connect(generateTeamReportButton, &QPushButton::clicked, this, [dateEdit1, dateEdit2, hour1, hour2, minute1, minute2](){
+        ReportHelper::reportTeams(QDateTime(dateEdit1->date(), QTime(hour1->currentText().toInt(), minute1->currentText().toInt())),
+                                  QDateTime(dateEdit2->date(), QTime(hour2->currentText().toInt(), minute2->currentText().toInt())));
+    });
+
+    connect(generateUserReportButton, &QPushButton::clicked, this, [dateEdit1, dateEdit2, hour1, hour2, minute1, minute2](){
+        ReportHelper::reportUsers(QDateTime(dateEdit1->date(), QTime(hour1->currentText().toInt(), minute1->currentText().toInt())),
+                                  QDateTime(dateEdit2->date(), QTime(hour2->currentText().toInt(), minute2->currentText().toInt())));
+    });
+
+    connect(generateEventReportButton, &QPushButton::clicked, this, [dateEdit1, dateEdit2, hour1, hour2, minute1, minute2, eventCombo](){
+        ReportHelper::reportQuiz(eventCombo->currentData(Qt::UserRole).toInt());
+    });
+
+    vbox->addStretch();
 
     return w;
 }
