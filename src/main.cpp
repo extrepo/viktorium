@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
         G_ERROR() << "Failed to create tables.";
         return -1;
     }
-    G_INFO() << "База готова к работе.";
+    G_INFO() << "Database is successfully initialized.";
 
     MainWindow w;
     w.show();

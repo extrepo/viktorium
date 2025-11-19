@@ -1,0 +1,169 @@
+/* Общее окно и базовые виджеты */
+QWidget {
+    	background-color: #F5F6FA;
+    	color: #222834;
+    	font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    	font-size: 13px;
+}
+
+QWidget[cssClass="whitebox"] {
+	background-color: white;
+}
+
+QWidget[cssClass="container"] {
+	background-color: transparent;
+}
+
+
+#headerWidget {
+   	background-color: white;          /* светло-серый фон */
+    	border-bottom: 2px solid #E6E9EE;
+}
+
+#headerWidget QLabel {
+   	font-weight: 600;
+    	font-size: 20px;
+	background-color: transparent;
+}
+
+#sidebarWidget {
+	background-color: #FFFFFF;
+	border-right: 1px solid #E6E9EE;
+}
+
+#sidebarWidget QPushButton {
+	background-color: #FFFFFF;
+	border: none;
+	text-align: left;
+	border-radius: 8px;
+	color: #253241;
+	font-size: 14px;
+}
+
+/* Hover для пунктов сайдбара */
+#sidebarWidget QPushButton:hover {
+    	background-color: #F5F8FC;
+}
+
+/* Активный пункт (checked) */
+#sidebarWidget QPushButton:checked,
+#sidebarWidget QPushButton[active="true"] {
+    	background-color: #E8F1FF;
+    	color: #4A90E2;
+    	font-weight: 700;
+    	border-left: 4px solid #2F80ED;
+}
+
+/* Стилизация области содержимого (pane) */
+#mainTabWidget::pane {
+	background: transparent;
+	border: none;
+}
+
+#previewWidget {
+	background-color: #FFFFFF;
+	padding: 12px;
+	margin: 10px;
+	border-radius: 16px;
+	border: 1px solid #E6E9EE;
+}
+
+#eventWidget {
+	background-color: #FFFFFF;
+	padding: 12px;
+	margin: 10px;
+	border-radius: 16px;
+	border: 1px solid #E6E9EE;
+}
+
+QLabel[cssClass = "title"] {
+	background-color: transparent;
+	font-size: 18px;
+	font-weight: 700;
+	color: #112233;
+	margin-bottom: 6px;
+}
+
+QLabel[cssClass = "subtitle"]  {
+	background-color: transparent;
+	font-size: 13px;
+
+	color: #4B5666;
+	margin-bottom: 6px;
+}
+
+QLabel[cssClass = "date"]  {
+	background-color: transparent;
+	font-size: 16px;
+	color: #4B5666;
+}
+
+QLabel[cssClass = "time"]  {
+	background-color: transparent;
+	font-size: 13px;
+	color: #4B5666;
+}
+
+QLabel[cssClass = "title2"]  {
+	background-color: transparent;
+	font-size: 16px;
+	color: #112233;
+	margin-top: 12px;
+	border-left: 4px solid #112233;
+}
+
+/* Специальная кнопка «Создать» — яркая primary */
+QPushButton[cssClass = "createButton"] {
+	background-color: #2F80ED;
+	color: white;
+	border: none;
+	border-radius: 10px;
+	font-weight: 600;
+	margin: 4px 8px;
+	padding: 10px 10px;
+}
+
+QPushButton[cssClass = "createButton"]:hover {
+    background-color: #1F6FE0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
