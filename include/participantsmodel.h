@@ -12,6 +12,7 @@
 #include <QStandardItemModel>
 
 struct Person {
+    int userId;
     QString surName;
     QString name;
     QString fatherName; // optional
@@ -38,6 +39,7 @@ public:
     void addParticipant(const Person &p);
     void removeParticipantAt(int row);
     QList<Person> participants() const { return m_parts; }
+    void reset();
 
 signals:
     void participantsChanged();

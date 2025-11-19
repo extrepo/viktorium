@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QComboBox>
+#include "groupmanager.h"
 
 class ParticipantSelectorWidget;
 
@@ -19,8 +20,11 @@ public:
     QLabel* date;
     QLabel* time;
 
+    QPushButton* generateButton;
+
     QComboBox* quizComboBox;
     ParticipantSelectorWidget *participantSelectorWidget;
+    GroupManagerWidget* groupmanagetWidget;
 
     void onTableRowClicked(int index);
 };

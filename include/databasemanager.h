@@ -25,6 +25,7 @@ public:
     // --- CRUD: user ---
     bool addUser(const QString &surname, const QString &name, const QString &fatherName, qint64 &outId);
     QVariantMap getUser(qint64 userId);
+    int getUser(const QString &surname, const QString &name, const QString &fatherName);
     QVector<QVariantMap> listUsers();
     bool updateUser(qint64 userId, const QString &surname, const QString &name, const QString &fatherName);
     bool removeUser(qint64 userId);
@@ -33,6 +34,8 @@ public:
     bool addTeam(const QString &title, qint64 &outId);
     QVariantMap getTeam(qint64 teamId);
     QVector<QVariantMap> listTeams();
+    QVector<QVariantMap> listTeamMembers(qint64 teamId);
+    QVector<QVariantMap> listTeamUsers(qint64 teamId);
     bool updateTeam(qint64 teamId, const QString &title);
     bool removeTeam(qint64 teamId);
 
@@ -68,6 +71,7 @@ public:
     QVector<QVariantMap> listParticipantsByEvent(qint64 eventId);
     bool updateParticipant(qint64 participantId, qint64 eventId, qint64 userId, qint64 teamId, int number);
     bool removeParticipant(qint64 participantId);
+    bool removeParticipant(qint64 userId, quint64 eventId);
 
     // --- CRUD: result ---
     bool addResult(qint64 questionId, qint64 participantId, qint64 eventId, bool result, qint64 &outId);
