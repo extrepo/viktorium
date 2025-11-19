@@ -8,5 +8,6 @@
         <file>icons/restart.ico</file>
         <file>icons/stop.ico</file>
         <file>icons/volume.ico</file>
+        <file>icons/clock.ico</file>
     </qresource>
 </RCC>
